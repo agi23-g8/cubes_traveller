@@ -226,7 +226,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 672582812}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &334989763
@@ -237,7 +238,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 334989758}
   serializedVersion: 4
-  m_Mass: 1000
+  m_Mass: 0.0000001
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -252,7 +253,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 14
   m_CollisionDetection: 0
@@ -268,7 +269,6 @@ GameObject:
   - component: {fileID: 672582811}
   - component: {fileID: 672582810}
   - component: {fileID: 672582809}
-  - component: {fileID: 672582808}
   - component: {fileID: 672582807}
   - component: {fileID: 672582813}
   m_Layer: 0
@@ -292,32 +292,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerSpeed: 1
   cubeTransform: {fileID: 334989762}
---- !u!143 &672582808
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 672582806}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.001
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!136 &672582809
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -399,12 +373,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 672582806}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.09100139, y: 0.6002, z: -0.23324}
   m_LocalScale: {x: 0.098439, y: 0.098439, z: 0.098439}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 334989762}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &672582813
 Rigidbody:
@@ -626,4 +600,3 @@ SceneRoots:
   - {fileID: 1578590932}
   - {fileID: 928492307}
   - {fileID: 334989762}
-  - {fileID: 672582812}
