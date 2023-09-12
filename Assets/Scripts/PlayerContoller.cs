@@ -29,7 +29,6 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-
         // raycast from the player to the cube origin
         // the face it hits is the face that is facing the player
         RaycastHit hit;
@@ -39,7 +38,7 @@ public class PlayerController : MonoBehaviour
         {
             currentNormal = hit.normal;
         }
-
+        
         // create a vector from the input, saturate it so that diagonal movement isn't faster
         Vector3 input = new Vector3(horizontalInput, verticalInput, 0);
         float inputSpeed = Mathf.Min(input.magnitude, 1.0f);
@@ -60,6 +59,5 @@ public class PlayerController : MonoBehaviour
 
         // rotate the player to align with the face normal
         rb.MoveRotation(Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation);
-
     }
 }
