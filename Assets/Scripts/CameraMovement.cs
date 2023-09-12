@@ -5,13 +5,14 @@ using UnityEngine;
 public class CameraMovement : MonoBehaviour
 {
     private Vector2 touchStartPosition;
-    public float rotationSpeed = 1.0f;
+    private Vector2 touchEndPos;
+    public float rotationSpeed = 10.0f;
     public Transform rotationAnchor;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        rotationAnchor = GameObject.Find("Cube").transform;
     }
 
     // Update is called once per frame
@@ -29,15 +30,16 @@ public class CameraMovement : MonoBehaviour
                     break;
 
                 case TouchPhase.Moved:
-                    Vector2 touchDelta = touch.position - touchStartPosition;
+                    touchEndPos = touch.position;
 
+                    Vector2 touchDelta = touchEndPos - touchStartPosition;
 
                     float rotationX = -touchDelta.y * rotationSpeed * Time.deltaTime;
                     float rotationY = touchDelta.x * rotationSpeed * Time.deltaTime;
 
                     // Turn the camera around the anchor
                     transform.RotateAround(rotationAnchor.position, Vector3.up, rotationY);
-                    transform.RotateAround(rotationAnchor.position, Vector3.right, rotationX);
+                    transform.RotateAround(rotationAnchor.position, Camera.main.transform.right, rotationX);
 
                     touchStartPosition = touch.position;
                     break;
