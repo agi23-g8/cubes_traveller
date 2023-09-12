@@ -29,16 +29,26 @@ public class PlayerInteractor : MonoBehaviour
             mask
         );
 
-        if (numInRange < 1) return;
+        if (numInRange < 1)
+        {
+            return;
+        }
+            
 
         var interactable = results[0].GetComponent<IInteractable>();
-        if (interactable == null) return;
+        if (interactable == null)
+        {
+            return;
+        }
 
         // TODO: Display UI with InteractionText
 
         // TODO: Checkout Unity's new Input System!
         if (Input.GetKeyDown(KeyCode.E))
+        {
             interactable.OnInteract(this);
+        }
+            
     }
 
     private void OnDrawGizmos()
