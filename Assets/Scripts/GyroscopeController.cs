@@ -25,30 +25,12 @@ public class GyroscopeController : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
 
-            switch (touch.phase)
+            if (touch.phase == TouchPhase.Began) 
             {
-                case TouchPhase.Began:
-                    touchStartPosition = touch.position;
-
-                    if (IsDoubleTap(touch.fingerId))
-                    {
-                        isPositionLocked = !isPositionLocked;
-                    }
-                    break;
-
-                case TouchPhase.Moved:
-                    Vector2 touchDelta = touch.position - touchStartPosition;
-
-
-                    float rotationX = touchDelta.y * rotationSpeed * Time.deltaTime;
-                    float rotationY = -touchDelta.x * rotationSpeed * Time.deltaTime;
-
-                    // Turn the camera around the anchor
-                    transform.RotateAround(rotationAnchor.position, Vector3.up, rotationY);
-                    transform.RotateAround(rotationAnchor.position, Vector3.right, rotationX);
-
-                    touchStartPosition = touch.position;
-                    break;
+                if (IsDoubleTap(touch.fingerId))
+                {
+                    isPositionLocked = !isPositionLocked;
+                }
             }
         }
 
@@ -56,6 +38,7 @@ public class GyroscopeController : MonoBehaviour
         {
             return;
         }
+
         // Read data for gyroscope
         Vector3 gyroRotationRate = Input.gyro.rotationRate;
         // Vector3 gyroAcceleration = Input.gyro.userAcceleration;
