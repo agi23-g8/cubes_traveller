@@ -8,12 +8,32 @@ public class Button : MonoBehaviour, IInteractable
     public string InteractionText => interactionText;
 
     [SerializeField]
-    private string displayText;
-    public string DisplayText => displayText;
+    private GameObject tooltip;
+    public GameObject UITooltip => tooltip;
 
-    public bool OnInteract(PlayerInteractor interactor)
+    private void Start()
+    {
+        ToggleTooltip(false);
+    }
+
+    public bool OnInteract(Interactor interactor)
     {
         Debug.Log(interactionText);
         return true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        ToggleTooltip(true);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        ToggleTooltip(false);
+    }
+
+    private void ToggleTooltip(bool show)
+    {
+        UITooltip.SetActive(show);
     }
 }
