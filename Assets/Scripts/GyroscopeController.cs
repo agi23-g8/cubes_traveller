@@ -12,11 +12,17 @@ public class GyroscopeController : MonoBehaviour
     private float lastTapTime = 0;
     private int lastTapFingerId = -1;
 
+    private Quaternion initialRotation;
+    private Quaternion initialGyroRotation;
+
+
     void Start()
     {
-        // Activate the gyroscope
         Input.gyro.enabled = true;
+        initialRotation = transform.rotation;
+        initialGyroRotation = GyroToUnity(Input.gyro.attitude);
     }
+
 
     void Update()
     {
@@ -25,7 +31,7 @@ public class GyroscopeController : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
 
-            if (touch.phase == TouchPhase.Began) 
+            if (touch.phase == TouchPhase.Began)
             {
                 if (IsDoubleTap(touch.fingerId))
                 {
@@ -39,12 +45,18 @@ public class GyroscopeController : MonoBehaviour
             return;
         }
 
-        // Read data for gyroscope
-        Vector3 gyroRotationRate = Input.gyro.rotationRate;
-        // Vector3 gyroAcceleration = Input.gyro.userAcceleration;
+        // Read data from gyroscope
+        Quaternion gyroAttitude = Input.gyro.attitude;
+        gyroAttitude = initialRotation * Quaternion.Inverse(initialGyroRotation) * GyroToUnity(gyroAttitude);
 
-        // Example of a rotation
-        transform.Rotate(-gyroRotationRate.x, -gyroRotationRate.z, -gyroRotationRate.y);
+        // make it camera relative
+        gyroAttitude = Camera.main.transform.rotation * gyroAttitude;
+        transform.rotation = gyroAttitude * Quaternion.Inverse(Camera.main.transform.rotation);
+    }
+
+    private static Quaternion GyroToUnity(Quaternion q)
+    {
+        return new Quaternion(q.x, q.z, q.y, -q.w);
     }
 
     private bool IsDoubleTap(int fingerId)
