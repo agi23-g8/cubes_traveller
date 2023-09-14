@@ -22,4 +22,8 @@ public interface IInteractable
     /// <param name="interactor">Reference to player</param>
     /// <returns>true if the interaction was successfull</returns>
     public bool OnInteract(Interactor interactor);
+
+    public void OnTriggerEnter(Collider other);
+
+    public void OnTriggerExit(Collider other);
 }

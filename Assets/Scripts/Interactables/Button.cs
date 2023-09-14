@@ -11,6 +11,9 @@ public class Button : MonoBehaviour, IInteractable
     private GameObject tooltip;
     public GameObject UITooltip => tooltip;
 
+    // connect this to the action you want to execute when the button is pressed
+    public WorldAction ActionOnPressed;
+
     private void Start()
     {
         ToggleTooltip(false);
@@ -19,15 +22,16 @@ public class Button : MonoBehaviour, IInteractable
     public bool OnInteract(Interactor interactor)
     {
         Debug.Log(interactionText);
+        ActionOnPressed.Execute();
         return true;
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void OnTriggerEnter(Collider other)
     {
         ToggleTooltip(true);
     }
 
-    private void OnTriggerExit(Collider other)
+    public void OnTriggerExit(Collider other)
     {
         ToggleTooltip(false);
     }

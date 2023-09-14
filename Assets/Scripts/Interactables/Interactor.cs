@@ -24,7 +24,7 @@ public class Interactor : MonoBehaviour
         // TODO: Other input methods
         if (Input.GetKeyDown(KeyCode.E))
         {
-            interactWith.OnInteract(this);
+            bool result = interactWith.OnInteract(this);
         }
     }
 
