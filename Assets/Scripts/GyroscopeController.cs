@@ -15,12 +15,14 @@ public class GyroscopeController : MonoBehaviour
     private Quaternion initialRotation;
     private Quaternion initialGyroRotation;
 
+    private Quaternion targetRotation;
 
     void Start()
     {
         Input.gyro.enabled = true;
         initialRotation = transform.rotation;
         initialGyroRotation = GyroToUnity(Input.gyro.attitude);
+        Input.gyro.updateInterval = 0.001f;
     }
 
 
@@ -51,7 +53,10 @@ public class GyroscopeController : MonoBehaviour
 
         // make it camera relative
         gyroAttitude = Camera.main.transform.rotation * gyroAttitude;
-        transform.rotation = gyroAttitude * Quaternion.Inverse(Camera.main.transform.rotation);
+        gyroAttitude = gyroAttitude * Quaternion.Inverse(Camera.main.transform.rotation);
+        targetRotation = gyroAttitude;
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+
     }
 
     private static Quaternion GyroToUnity(Quaternion q)
