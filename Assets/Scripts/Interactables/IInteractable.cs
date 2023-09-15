@@ -1,3 +1,4 @@
+using UnityEngine;
 
 /// <summary>
 /// Let objects use this interface to enable player interaction.
@@ -10,9 +11,9 @@ public interface IInteractable
     public string InteractionText { get; }
 
     /// <summary>
-    /// Text that is displayed when the player is in range of this object.
+    /// UI object that hints player
     /// </summary>
-    public string DisplayText { get; }
+    public GameObject UITooltip { get; }
 
     /// <summary>
     /// Called when the player interacts with this object. 
@@ -20,5 +21,9 @@ public interface IInteractable
     /// </summary>
     /// <param name="interactor">Reference to player</param>
     /// <returns>true if the interaction was successfull</returns>
-    public bool OnInteract(PlayerInteractor interactor);
+    public bool OnInteract(Interactor interactor);
+
+    public void OnTriggerEnter(Collider other);
+
+    public void OnTriggerExit(Collider other);
 }
