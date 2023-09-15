@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// This allwos a game object to act as in interactor for Interactable objects.
+/// This allows a game object to act as an interactor for Interactable objects.
 /// Attach this script to an empty game object.
 /// </summary>
 [RequireComponent(typeof(Collider))]
