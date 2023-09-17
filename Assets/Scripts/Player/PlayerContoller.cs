@@ -73,12 +73,15 @@ public class PlayerController : MonoBehaviour
         rb.MovePosition(newPos);
 
         // rotate the player to align with the face normal
-        rb.MoveRotation(transform.rotation * Quaternion.FromToRotation(transform.up, currentNormal));
+        // TODO: rework this after demo
+        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation;
+        rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, 0.4f));
 
         // apply gravity
         rb.AddForce(Physics.gravity.magnitude * -currentNormal);
 
 
+        // TODO: rework this after demo
         // check if the player is grounded
         isGrounded = false;
         if (Physics.Raycast(currentPosition, -currentNormal, out hit))
