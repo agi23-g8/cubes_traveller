@@ -22,7 +22,7 @@ public class Interactor : MonoBehaviour
         }
 
         // TODO: Other input methods
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetButtonDown("Interact"))
         {
             bool result = interactWith.OnInteract(this);
         }

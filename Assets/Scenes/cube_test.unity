@@ -373,8 +373,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerSpeed: 1
+  jumpForce: 2
   cubeTransform: {fileID: 334989762}
-  cubeRotation: {x: 0, y: 0, z: 0, w: 0}
+  cubeRelativePosition: {x: 0, y: 0, z: 0}
 --- !u!136 &672582809
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -472,7 +473,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 672582806}
   serializedVersion: 4
-  m_Mass: 10
+  m_Mass: 1
   m_Drag: 0.5
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}

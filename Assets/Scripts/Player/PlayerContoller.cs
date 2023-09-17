@@ -8,11 +8,18 @@ public class PlayerController : MonoBehaviour
     private float playerSpeed = 2.0f;
 
     [SerializeField]
+    private float jumpForce = 5.0f;
+
+    [SerializeField]
     Transform cubeTransform; // Assign this in the inspector
 
     private Rigidbody rb;
     private float horizontalInput;
     private float verticalInput;
+
+    private bool jumpInput;
+    private bool isGrounded;
+
 
     // Position relative to the rotation of the cube
     public Vector3 cubeRelativePosition;
@@ -29,6 +36,9 @@ public class PlayerController : MonoBehaviour
         // get input from player
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
+
+        // catch jump event
+        jumpInput = Input.GetButton("Jump");
     }
 
     void FixedUpdate()
@@ -67,6 +77,23 @@ public class PlayerController : MonoBehaviour
 
         // apply gravity
         rb.AddForce(Physics.gravity.magnitude * -currentNormal);
+
+
+        // check if the player is grounded
+        isGrounded = false;
+        if (Physics.Raycast(currentPosition, -currentNormal, out hit))
+        {
+            if (hit.distance < 0.1f)
+            {
+                isGrounded = true;
+            }
+        }
+
+        // jump
+        if (jumpInput && isGrounded)
+        {
+            rb.AddForce(currentNormal * jumpForce, ForceMode.VelocityChange);
+        }
 
     }
 }
