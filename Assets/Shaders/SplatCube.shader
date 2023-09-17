@@ -3,20 +3,20 @@ Shader "Custom/CubeShader"
     Properties
     {
         // splat map
+        _SliceCount ("SliceCount", Range(1,256)) = 256
         _SplatMap ("SplatMap", 2D) = "black" {}
-        _SliceCount ("SliceCount", Range(1,256)) = 6
-
-        // noise map
-        _NoiseMap("NoiseMap", 2D) = "black" {}
-        _UvNoiseScale("UvNoiseScale", Float) = 15.0
-        _UvNoiseRadius("UvNoiseRadius", Float) = 5.0
 
         // detail maps
+        _DetailUvScale ("DetailUvScale", Float) = 5.0
         _AlbedoMaps ("AlbedoMaps", 2DArray) = "" {}
         _NormalMaps ("NormalMaps", 2DArray) = "" {}
         _RoughMaps ("RoughMaps", 2DArray) = "" {}
-        _MetalMaps ("MetalMaps", 2DArray) = "" {}
-        _DetailUvScale ("DetailUvScale", Float) = 5.0
+        _CavityMaps ("CavityMaps", 2DArray) = "" {}
+
+        // noise map
+        _UvNoiseScale("UvNoiseScale", Float) = 15.0
+        _UvNoiseRadius("UvNoiseRadius", Float) = 5.0
+        _NoiseMap("NoiseMap", 2D) = "black" {}
     }
 
     SubShader
@@ -65,22 +65,22 @@ Shader "Custom/CubeShader"
         UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
         UNITY_DECLARE_TEX2DARRAY(_NormalMaps);
         UNITY_DECLARE_TEX2DARRAY(_RoughMaps);
-        UNITY_DECLARE_TEX2DARRAY(_MetalMaps);
+        UNITY_DECLARE_TEX2DARRAY(_CavityMaps);
 
         struct MaterialSample
         {
             float3 albedo;
             float3 normal;
             float roughness;
-            float metalness;
+            float cavity;
         };
 
         /// fetches current material index from the splat map
         uint FetchMaterialIndex(in float2 _uv)
         {
-            const float sliceCount = float(_SliceCount);
+            const float range = max(0, float(_SliceCount - 1));
             const float normIndex = tex2D(_SplatMap, _uv);
-            return uint(min(sliceCount - 1, floor(sliceCount * normIndex)));
+            return uint(min(range, range * normIndex + 0.5));
         }
 
         /// fetches PBR material texture maps (albedo, normal, roughness, etc)
@@ -91,7 +91,7 @@ Shader "Custom/CubeShader"
             MaterialSample mat;
             mat.albedo = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, uvw).xyz;
             mat.roughness = UNITY_SAMPLE_TEX2DARRAY(_RoughMaps, uvw).x;
-            mat.metalness = UNITY_SAMPLE_TEX2DARRAY(_MetalMaps, uvw).x;
+            mat.cavity = UNITY_SAMPLE_TEX2DARRAY(_CavityMaps, uvw).x;
 
             mat.normal = UNITY_SAMPLE_TEX2DARRAY(_NormalMaps, uvw).xyz;
             mat.normal = LinearToGammaSpace(mat.normal);
@@ -113,7 +113,7 @@ Shader "Custom/CubeShader"
             // other material properties are already in linear space
             res.normal = lerp(_mat1.normal, _mat2.normal, _weight);
             res.roughness = lerp(_mat1.roughness, _mat2.roughness, _weight);
-            res.metalness = lerp(_mat1.metalness, _mat2.metalness, _weight);
+            res.cavity = lerp(_mat1.cavity, _mat2.cavity, _weight);
 
             return res;
         }
@@ -180,12 +180,12 @@ Shader "Custom/CubeShader"
             float2 offset = float2(noiseA, noiseB);
             offset = 2 * offset - 1;
 
-            return _baseUv + _noiseRadius * texelSize * offset;
+            return clamp(_baseUv + _noiseRadius * texelSize * offset, 0.0, 1.0);
         }
 
         void surf(Input _varyings, inout SurfaceOutputStandard _surfaceOut_)
         {
-            const float2 baseUv = RandomizeUv(_varyings.baseUv, _UvNoiseScale, _UvNoiseRadius);
+            const float2 baseUv = _varyings.baseUv;
             const float2 detailUv = _varyings.detailUv;
 
             //const MaterialSample mat = SampleNearestMaterial(baseUv, detailUv);
@@ -194,7 +194,8 @@ Shader "Custom/CubeShader"
             _surfaceOut_.Albedo = mat.albedo;
             _surfaceOut_.Normal = mat.normal;
             _surfaceOut_.Smoothness = 1.f - mat.roughness;
-            _surfaceOut_.Metallic = mat.metalness;
+            //_surfaceOut_.Occlusion = 1.f - mat.cavity;
+            _surfaceOut_.Metallic = 0.f;
             _surfaceOut_.Alpha = 1.f;
         }
 
