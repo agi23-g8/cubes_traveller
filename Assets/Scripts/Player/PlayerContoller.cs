@@ -14,9 +14,13 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float verticalInput;
 
+    // Position relative to the rotation of the cube
+    public Vector3 cubeRelativePosition;
+
     private void Start()
     {
         rb = gameObject.GetComponent<Rigidbody>();
+        cubeRelativePosition = cubeTransform.InverseTransformPoint(transform.position);
     }
 
 
@@ -29,16 +33,21 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+
+        // current position relative to the cube
+        Vector3 currentPosition = cubeTransform.TransformPoint(cubeRelativePosition);
+
+
         // raycast from the player to the cube origin
         // the face it hits is the face that is facing the player
         RaycastHit hit;
-        Vector3 rayDir = cubeTransform.position - transform.position;
+        Vector3 rayDir = cubeTransform.position - currentPosition;
         Vector3 currentNormal = transform.up;
-        if (Physics.Raycast(transform.position, rayDir, out hit))
+        if (Physics.Raycast(currentPosition, rayDir, out hit))
         {
             currentNormal = hit.normal;
         }
-        
+
         // create a vector from the input, saturate it so that diagonal movement isn't faster
         Vector3 input = new Vector3(horizontalInput, verticalInput, 0);
         float inputSpeed = Mathf.Min(input.magnitude, 1.0f);
@@ -50,14 +59,14 @@ public class PlayerController : MonoBehaviour
         // project the move vector onto the plane of the face
         moveDir = Vector3.ProjectOnPlane(moveDir, currentNormal).normalized;
 
-        // move the player relative to the parent (cube)
-        Vector3 newPos = transform.position + moveDir * inputSpeed * playerSpeed * Time.fixedDeltaTime;
+        Vector3 newPos = currentPosition + inputSpeed * playerSpeed * Time.fixedDeltaTime * moveDir;
         rb.MovePosition(newPos);
+
+        // rotate the player to align with the face normal
+        rb.MoveRotation(transform.rotation * Quaternion.FromToRotation(transform.up, currentNormal));
 
         // apply gravity
         rb.AddForce(Physics.gravity.magnitude * -currentNormal);
 
-        // rotate the player to align with the face normal
-        rb.MoveRotation(Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation);
     }
 }
