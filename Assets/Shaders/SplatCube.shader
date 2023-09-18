@@ -12,11 +12,6 @@ Shader "Custom/CubeShader"
         _NormalMaps ("NormalMaps", 2DArray) = "" {}
         _RoughMaps ("RoughMaps", 2DArray) = "" {}
         _CavityMaps ("CavityMaps", 2DArray) = "" {}
-
-        // noise map
-        _UvNoiseScale("UvNoiseScale", Float) = 15.0
-        _UvNoiseRadius("UvNoiseRadius", Float) = 5.0
-        _NoiseMap("NoiseMap", 2D) = "black" {}
     }
 
     SubShader
@@ -54,10 +49,6 @@ Shader "Custom/CubeShader"
         /*********************************
         *         Fragment shader        *
         *********************************/
-        float _UvNoiseScale;
-        float _UvNoiseRadius;
-        sampler2D _NoiseMap;
-
         sampler2D _SplatMap;
         half4 _SplatMap_TexelSize;
         int _SliceCount;
@@ -166,21 +157,6 @@ Shader "Custom/CubeShader"
             }
 
             return LerpMaterial(mat00, mat01, coeffY);
-        }
-
-        // Randomizes given uvs to introduce noise on material transitions
-        float2 RandomizeUv(in float2 _baseUv, in float _noiseScale, in float _noiseRadius)
-        {
-            const float2 texelSize = _SplatMap_TexelSize.xy;
-            const float2 noiseUv = _noiseScale * _baseUv;
-
-            const float noiseA = tex2D(_NoiseMap, noiseUv).r;
-            const float noiseB = tex2D(_NoiseMap, noiseUv + float2(0.5, 0.5)).r;
-
-            float2 offset = float2(noiseA, noiseB);
-            offset = 2 * offset - 1;
-
-            return clamp(_baseUv + _noiseRadius * texelSize * offset, 0.0, 1.0);
         }
 
         void surf(Input _varyings, inout SurfaceOutputStandard _surfaceOut_)
