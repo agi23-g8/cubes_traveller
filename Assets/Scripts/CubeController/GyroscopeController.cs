@@ -20,9 +20,12 @@ public class GyroscopeController : MonoBehaviour
     [SerializeField]
     private PlayerController playerController;
 
-    void Start()
+    IEnumerator Start()
     {
+
         Input.gyro.enabled = true;
+        // wait for 3 seconds to let the gyro start up
+        yield return new WaitForSeconds(1);
         initialRotation = transform.rotation;
         initialGyroRotation = GyroToUnity(Input.gyro.attitude);
         Input.gyro.updateInterval = 0.01f;
