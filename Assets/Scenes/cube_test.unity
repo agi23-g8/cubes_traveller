@@ -213,9 +213,9 @@ GameObject:
   - component: {fileID: 334989762}
   - component: {fileID: 334989761}
   - component: {fileID: 334989760}
-  - component: {fileID: 334989763}
   - component: {fileID: 334989764}
   - component: {fileID: 334989765}
+  - component: {fileID: 334989766}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -291,33 +291,6 @@ Transform:
   - {fileID: 672582812}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &334989763
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 334989758}
-  serializedVersion: 4
-  m_Mass: 0.0000001
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 14
-  m_CollisionDetection: 1
 --- !u!114 &334989764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,6 +325,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -5495902117074765545, guid: 5e961d300b4698345b72a1314f28754a, type: 3}
+--- !u!114 &334989766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 334989758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8bbbc6ab83ebb5aba9ec4e53556b08c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: 1
+  rotationAnchor: {fileID: 0}
 --- !u!1 &672582806
 GameObject:
   m_ObjectHideFlags: 0
@@ -499,7 +486,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -749,6 +736,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd6004e60656c364cbd402b9ebd53272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 0
 --- !u!54 &1006797948
 Rigidbody:
   m_ObjectHideFlags: 0
