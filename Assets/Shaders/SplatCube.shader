@@ -6,12 +6,18 @@ Shader "Custom/CubeShader"
         _SliceCount ("SliceCount", Range(1,256)) = 256
         _SplatMap ("SplatMap", 2D) = "black" {}
 
-        // detail maps
-        _DetailUvScale ("DetailUvScale", Float) = 5.0
+        // detail maps + toogle (for vizualisation only)
+        [MaterialToggle] _ApplyAlbedo("ApplyAlbedo", Float) = 1
         _AlbedoMaps ("AlbedoMaps", 2DArray) = "" {}
+        [MaterialToggle] _ApplyNormals("ApplyNormals", Float) = 1
         _NormalMaps ("NormalMaps", 2DArray) = "" {}
+        [MaterialToggle] _ApplyRoughness("ApplyRoughness", Float) = 1
         _RoughMaps ("RoughMaps", 2DArray) = "" {}
+        [MaterialToggle] _ApplyCavity("ApplyCavity", Float) = 1
         _CavityMaps ("CavityMaps", 2DArray) = "" {}
+
+        // material tiling
+        _DetailUvScale ("DetailUvScale", Float) = 5.0
     }
 
     SubShader
@@ -53,6 +59,11 @@ Shader "Custom/CubeShader"
         half4 _SplatMap_TexelSize;
         int _SliceCount;
 
+        float _ApplyAlbedo;
+        float _ApplyNormals;
+        float _ApplyRoughness;
+        float _ApplyCavity;
+
         UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
         UNITY_DECLARE_TEX2DARRAY(_NormalMaps);
         UNITY_DECLARE_TEX2DARRAY(_RoughMaps);
@@ -83,10 +94,7 @@ Shader "Custom/CubeShader"
             mat.albedo = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, uvw).xyz;
             mat.roughness = UNITY_SAMPLE_TEX2DARRAY(_RoughMaps, uvw).x;
             mat.cavity = UNITY_SAMPLE_TEX2DARRAY(_CavityMaps, uvw).x;
-
-            mat.normal = UNITY_SAMPLE_TEX2DARRAY(_NormalMaps, uvw).xyz;
-            mat.normal = LinearToGammaSpace(mat.normal);
-            mat.normal = 2 * mat.normal - 1;
+            mat.normal = UnpackNormal(UNITY_SAMPLE_TEX2DARRAY(_NormalMaps, uvw));
 
             return mat;
         }
@@ -167,12 +175,22 @@ Shader "Custom/CubeShader"
             //const MaterialSample mat = SampleNearestMaterial(baseUv, detailUv);
             const MaterialSample mat = SampleBilinearMaterial(baseUv, detailUv);
 
-            _surfaceOut_.Albedo = mat.albedo;
-            _surfaceOut_.Normal = mat.normal;
-            _surfaceOut_.Smoothness = 1.f - mat.roughness;
-            //_surfaceOut_.Occlusion = 1.f - mat.cavity;
-            _surfaceOut_.Metallic = 0.f;
-            _surfaceOut_.Alpha = 1.f;
+            if (_ApplyAlbedo)
+            {
+                _surfaceOut_.Albedo = mat.albedo;
+            }
+            if (_ApplyNormals)
+            {
+                _surfaceOut_.Normal = mat.normal;
+            }
+            if (_ApplyRoughness)
+            {
+                _surfaceOut_.Smoothness = 1.f - mat.roughness;
+            }
+            if (_ApplyCavity)
+            {
+                _surfaceOut_.Occlusion = mat.cavity;
+            }
         }
 
         // shader program ends here
