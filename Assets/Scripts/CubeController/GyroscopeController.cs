@@ -12,11 +12,25 @@ public class GyroscopeController : MonoBehaviour
     private float lastTapTime = 0;
     private int lastTapFingerId = -1;
 
-    void Start()
+    private Quaternion initialRotation;
+    private Quaternion initialGyroRotation;
+
+    private Quaternion targetRotation;
+
+    [SerializeField]
+    private PlayerController playerController;
+
+    IEnumerator Start()
     {
-        // Activate the gyroscope
+
         Input.gyro.enabled = true;
+        // wait for 3 seconds to let the gyro start up
+        yield return new WaitForSeconds(1);
+        initialRotation = transform.rotation;
+        initialGyroRotation = GyroToUnity(Input.gyro.attitude);
+        Input.gyro.updateInterval = 0.01f;
     }
+
 
     void Update()
     {
@@ -25,7 +39,7 @@ public class GyroscopeController : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
 
-            if (touch.phase == TouchPhase.Began) 
+            if (touch.phase == TouchPhase.Began)
             {
                 if (IsDoubleTap(touch.fingerId))
                 {
@@ -39,12 +53,26 @@ public class GyroscopeController : MonoBehaviour
             return;
         }
 
-        // Read data for gyroscope
-        Vector3 gyroRotationRate = Input.gyro.rotationRate;
-        // Vector3 gyroAcceleration = Input.gyro.userAcceleration;
+        // Read data from gyroscope
+        Quaternion gyroAttitude = Input.gyro.attitude;
+        gyroAttitude = initialRotation * Quaternion.Inverse(initialGyroRotation) * GyroToUnity(gyroAttitude);
 
-        // Example of a rotation
-        transform.Rotate(-gyroRotationRate.x, -gyroRotationRate.z, -gyroRotationRate.y);
+        // make it camera relative
+        gyroAttitude = Camera.main.transform.rotation * gyroAttitude;
+        gyroAttitude *= Quaternion.Inverse(Camera.main.transform.rotation);
+        targetRotation = gyroAttitude;
+    }
+
+    void FixedUpdate()
+    {
+        Quaternion newCubeRotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
+        playerController.cubeRelativePosition = transform.InverseTransformPoint(playerController.transform.position);
+        transform.rotation = newCubeRotation;
+    }
+
+    private static Quaternion GyroToUnity(Quaternion q)
+    {
+        return new Quaternion(q.x, q.z, q.y, -q.w);
     }
 
     private bool IsDoubleTap(int fingerId)
