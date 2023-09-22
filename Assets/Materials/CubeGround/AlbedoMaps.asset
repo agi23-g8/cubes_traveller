@@ -17,7 +17,7 @@ MonoBehaviour:
   m_compression: 1
   m_maxSize: 1024
   m_targetMaterial: {fileID: 2100000, guid: 2aa7b440d67303c4ba7734e87d733f9d, type: 2}
-  m_targetSlot: _AlbedoMaps
+  m_targetSlot: _txAlbedoMaps
   m_textures:
   - {fileID: 2800000, guid: c37c9b28a6cdc5c4a92e673864e009ab, type: 3}
   - {fileID: 2800000, guid: f15144027c8e440428ebc102e375111f, type: 3}
