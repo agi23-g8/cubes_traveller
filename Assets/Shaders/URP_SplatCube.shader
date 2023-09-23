@@ -78,7 +78,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
             *********************************/
             struct Attributes
             {
-                float4 position : POSITION;
+                float3 position : POSITION;
                 float3 normal : NORMAL;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
@@ -99,7 +99,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 Varyings varyings;
                 UNITY_SETUP_INSTANCE_ID(_attributes);
 
-                float3 positionWS = TransformObjectToWorld(_attributes.position.xyz);
+                float3 positionWS = TransformObjectToWorld(_attributes.position);
                 float3 normalWS = TransformObjectToWorldNormal(_attributes.normal);
 
                 #if _CASTING_PUNCTUAL_LIGHT_SHADOW
@@ -189,7 +189,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
             *********************************/
             struct Attributes
             {
-                float4 position : POSITION;
+                float3 position : POSITION;
                 float3 normal : NORMAL;
                 float4 tangent : TANGENT;
                 float2 texCoord : TEXCOORD0;
@@ -325,7 +325,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 const uint matIndex = FetchMaterialIndex(iuv);
 
                 const float2 uvDx = ddx_coarse(_uvDetail);
-                const float2 uvDy = ddx_coarse(_uvDetail);
+                const float2 uvDy = ddy_coarse(_uvDetail);
                 return FetchMaterialValues(matIndex, _uvDetail, uvDx, uvDy);
             }
 
@@ -384,7 +384,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 UNITY_TRANSFER_INSTANCE_ID(_attributes, varyings);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(varyings);
 
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(_attributes.position.xyz);
+                VertexPositionInputs vertexInput = GetVertexPositionInputs(_attributes.position);
                 VertexNormalInputs normalInput = GetVertexNormalInputs(_attributes.normal, _attributes.tangent);
 
                 // UV
@@ -401,14 +401,13 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 varyings.bitangentWS = normalInput.bitangentWS;
 
                 // lighting
+                OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
                 OUTPUT_LIGHTMAP_UV(_attributes.staticLightmapUV, unity_LightmapST, varyings.staticLightmapUV);
-
                 #ifdef DYNAMICLIGHTMAP_ON
-                    varyings.dynamicLightmapUV = _attributes.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+                    OUTPUT_LIGHTMAP_UV(_attributes.dynamicLightmapUV, unity_DynamicLightmapST, varyings.dynamicLightmapUV);
                 #endif
 
-                OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
-
+                // shadows
                 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                     varyings.shadowCoord = GetShadowCoord(vertexInput);
                 #endif
@@ -501,7 +500,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
 
                 return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + GIColor, surfaceData.occlusion);
             }
-        
+
             ENDHLSL
         }
     }
