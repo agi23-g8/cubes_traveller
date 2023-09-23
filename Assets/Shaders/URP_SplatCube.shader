@@ -400,9 +400,11 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 varyings.tangentWS = normalInput.tangentWS;
                 varyings.bitangentWS = normalInput.bitangentWS;
 
-                // lighting
+                // static lighting
                 OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
                 OUTPUT_LIGHTMAP_UV(_attributes.staticLightmapUV, unity_LightmapST, varyings.staticLightmapUV);
+
+                // dynamic lighting
                 #ifdef DYNAMICLIGHTMAP_ON
                     OUTPUT_LIGHTMAP_UV(_attributes.dynamicLightmapUV, unity_DynamicLightmapST, varyings.dynamicLightmapUV);
                 #endif
