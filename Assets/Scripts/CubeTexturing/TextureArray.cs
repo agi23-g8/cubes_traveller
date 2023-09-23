@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +87,7 @@ public static class Texture2DArrayExtensions
 public class TextureArray : ScriptableObject
 {
     [SerializeField] private bool m_useMipMaps = true;
-    [SerializeField] private PrettyTextureImporterType m_type = PrettyTextureImporterType.ColorMap; 
+    [SerializeField] private PrettyTextureImporterType m_type = PrettyTextureImporterType.ColorMap;
     [SerializeField] private PrettyTextureImporterCompression m_compression = PrettyTextureImporterCompression.Standard;
     [SerializeField] private MaxSize m_maxSize = MaxSize._2048;
     [SerializeField] private Material m_targetMaterial;
@@ -170,3 +172,5 @@ public class TextureArray : ScriptableObject
     }
 
 }
+
+#endif // UNITY_EDITOR

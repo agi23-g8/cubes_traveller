@@ -20,15 +20,14 @@ public class GyroscopeController : MonoBehaviour
     [SerializeField]
     private PlayerController playerController;
 
+    [SerializeField]
+    Transform gyroTransform; // Assign this in the inspector
+
     IEnumerator Start()
     {
-
-        Input.gyro.enabled = true;
-        // wait for 3 seconds to let the gyro start up
         yield return new WaitForSeconds(1);
         initialRotation = transform.rotation;
-        initialGyroRotation = GyroToUnity(Input.gyro.attitude);
-        Input.gyro.updateInterval = 0.01f;
+        initialGyroRotation = gyroTransform.rotation;
     }
 
 
@@ -54,8 +53,8 @@ public class GyroscopeController : MonoBehaviour
         }
 
         // Read data from gyroscope
-        Quaternion gyroAttitude = Input.gyro.attitude;
-        gyroAttitude = initialRotation * Quaternion.Inverse(initialGyroRotation) * GyroToUnity(gyroAttitude);
+        Quaternion gyroAttitude = gyroTransform.rotation;
+        gyroAttitude = initialRotation * Quaternion.Inverse(initialGyroRotation) * gyroAttitude;
 
         // make it camera relative
         gyroAttitude = Camera.main.transform.rotation * gyroAttitude;
