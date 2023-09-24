@@ -21,13 +21,13 @@ public class GyroscopeController : MonoBehaviour
     private PlayerController playerController;
 
     [SerializeField]
-    Transform gyroTransform; // Assign this in the inspector
+    Transform gyro; // Assign this in the inspector
 
     IEnumerator Start()
     {
         yield return new WaitForSeconds(1);
-        initialRotation = transform.rotation;
-        initialGyroRotation = gyroTransform.rotation;
+
+        RecalibrateGyro();
     }
 
 
@@ -52,14 +52,21 @@ public class GyroscopeController : MonoBehaviour
             return;
         }
 
+
         // Read data from gyroscope
-        Quaternion gyroAttitude = gyroTransform.rotation;
+        Quaternion gyroAttitude = GyroToUnity(gyro.rotation);
         gyroAttitude = initialRotation * Quaternion.Inverse(initialGyroRotation) * gyroAttitude;
 
         // make it camera relative
         gyroAttitude = Camera.main.transform.rotation * gyroAttitude;
         gyroAttitude *= Quaternion.Inverse(Camera.main.transform.rotation);
         targetRotation = gyroAttitude;
+    }
+
+    public void RecalibrateGyro()
+    {
+        initialGyroRotation = GyroToUnity(gyro.rotation);
+        initialRotation = Quaternion.identity;
     }
 
     void FixedUpdate()

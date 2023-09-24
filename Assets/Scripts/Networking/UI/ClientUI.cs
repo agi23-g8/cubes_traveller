@@ -9,15 +9,22 @@ public class ServerBrowser : MonoBehaviour
     NetworkManager networkManager;
 
     [SerializeField]
-    private GameObject serverBrowser;
+    private GameObject[] seenDuringBrowser;
 
     [SerializeField]
-    private GameObject disconnectButton;
+    private GameObject[] seenDuringGame;
 
 
     void Update()
     {
-        serverBrowser.SetActive(!networkManager.IsConnectedClient);
-        disconnectButton.SetActive(networkManager.IsConnectedClient);
+        foreach (GameObject obj in seenDuringBrowser)
+        {
+            obj.SetActive(!networkManager.IsConnectedClient);
+        }
+
+        foreach (GameObject obj in seenDuringGame)
+        {
+            obj.SetActive(networkManager.IsConnectedClient);
+        }
     }
 }
