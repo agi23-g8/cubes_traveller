@@ -97,7 +97,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: ca3cf12f4fd9ab24e9a6552f09aad4b9,
+    type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -336,10 +337,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8bbbc6ab83ebb5aba9ec4e53556b08c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationSpeed: 20
+  rotationSpeed: 10
   rotationAnchor: {fileID: 0}
   playerController: {fileID: 672582807}
-  gyroTransform: {fileID: 1212023986}
+  gyro: {fileID: 910916306}
 --- !u!114 &672582807 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6186677262286660282, guid: 77a7f27b58093f744a46d44c4ef7538b,
@@ -456,6 +457,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bac1ba6dbb725dc418ea62dbc104cda6, type: 3}
+--- !u!4 &910916306 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2258347432905246749, guid: bac1ba6dbb725dc418ea62dbc104cda6,
+    type: 3}
+  m_PrefabInstance: {fileID: 910916305}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &928492304
 GameObject:
   m_ObjectHideFlags: 0
@@ -730,12 +737,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1006797946}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &1212023986 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2258347432905246749, guid: bac1ba6dbb725dc418ea62dbc104cda6,
-    type: 3}
-  m_PrefabInstance: {fileID: 910916305}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1578590929
 GameObject:
   m_ObjectHideFlags: 0
