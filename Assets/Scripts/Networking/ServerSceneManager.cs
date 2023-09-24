@@ -9,8 +9,20 @@ public class ServerSceneManager : MonoBehaviour
 
     NetworkManager networkManager;
 
-    void Start()
+
+    private IEnumerator Start()
     {
+        // wait for the network manager to be initialized
+        while (NetworkManager.Singleton == null)
+            yield return null;
+
+        // prevent duplicates
+        if (GetComponent<NetworkManager>() != NetworkManager.Singleton)
+        {
+            Debug.Log("Destroying this clone", gameObject);
+            Destroy(gameObject, 5f);
+        }
+
         networkManager = GetComponent<NetworkManager>();
     }
 
@@ -18,7 +30,7 @@ public class ServerSceneManager : MonoBehaviour
     void Update()
     {
         // when the client is connected, load the scene
-        if (networkManager.ConnectedClientsList.Count > 0)
+        if (networkManager.ConnectedClientsList.Count > 0 && SceneManager.GetActiveScene().buildIndex == 0)
         {
             SceneManager.LoadScene(1);
         }
