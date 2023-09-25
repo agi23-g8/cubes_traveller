@@ -17,7 +17,7 @@ MonoBehaviour:
   m_compression: 1
   m_maxSize: 1024
   m_targetMaterial: {fileID: 2100000, guid: 2aa7b440d67303c4ba7734e87d733f9d, type: 2}
-  m_targetSlot: _NormalMaps
+  m_targetSlot: _txNormalMaps
   m_textures:
   - {fileID: 2800000, guid: d34bca2c09e88834d81fe0bad02d11db, type: 3}
   - {fileID: 2800000, guid: b1625a0d080176944882b8f3be0a5e28, type: 3}
