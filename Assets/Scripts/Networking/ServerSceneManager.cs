@@ -6,23 +6,25 @@ using UnityEngine.SceneManagement;
 
 public class ServerSceneManager : MonoBehaviour
 {
-
     NetworkManager networkManager;
 
 
-    private IEnumerator Start()
+    void Awake()
     {
-        // wait for the network manager to be initialized
-        while (NetworkManager.Singleton == null)
-            yield return null;
-
         // prevent duplicates
-        if (GetComponent<NetworkManager>() != NetworkManager.Singleton)
+        if (FindObjectsOfType<ServerSceneManager>().Length > 1)
         {
             Debug.Log("Destroying this clone", gameObject);
-            Destroy(gameObject, 5f);
+            Destroy(gameObject);
         }
+        else
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+    }
 
+    void Start()
+    {
         networkManager = GetComponent<NetworkManager>();
     }
 
