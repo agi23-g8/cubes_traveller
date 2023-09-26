@@ -10,7 +10,7 @@ public class SkyboxController : MonoBehaviour
     [SerializeField, Range(0, 24)]
     private float timeOfDay = 9.0f;
 
-    [SerializeField, Range(0.01f, 1.0f)]
+    [SerializeField, Range(1.0f, 3600.0f)]
     private float timeScale = 1.0f;
 
     public AnimationCurve sunCurve;
@@ -36,7 +36,7 @@ public class SkyboxController : MonoBehaviour
 
     private void UpdateSunAndMoon()
     {
-        timeOfDay += Time.deltaTime * timeScale;
+        timeOfDay += Time.deltaTime * timeScale / 3600;
         timeOfDay %= 24;
 
         // normalize timeOfDay to 0..1
