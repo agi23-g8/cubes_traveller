@@ -58,9 +58,21 @@ public class PlayerController : MonoBehaviour
             currentNormal = hit.normal;
         }
 
+        // if the face is facing the camera, vertical input is up/down
+        // if they are orthogonal, vertical input is forward/backward
+        // if the face is facing away from the camera, vertical input is reversed
+
+        // dot product of the normal and the camera forward
+        // this is used to determine if the current face is facing the camera
+        float faceCameraAlignment = Vector3.Dot(-currentNormal, Camera.main.transform.forward);
+
+        // create a inverse 'v' shape for the forward/backward scale, from 0 to 1
+        float forwardBackwardScale = Mathf.Abs(faceCameraAlignment) * -1.0f + 1.0f;
+
         // create a vector from the input, saturate it so that diagonal movement isn't faster
-        Vector3 input = new Vector3(horizontalInput, verticalInput, 0);
+        Vector3 input = new Vector3(horizontalInput, verticalInput * faceCameraAlignment, verticalInput * forwardBackwardScale);
         float inputSpeed = Mathf.Min(input.magnitude, 1.0f);
+
 
         // transform it from camera space to world space
         // this makes movement relative to the camera, which is more intuitive
