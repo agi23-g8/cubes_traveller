@@ -8,7 +8,7 @@ public class SkyboxController : MonoBehaviour
     public Light moon;
 
     [SerializeField, Range(0, 24)]
-    private float timeOfDay = 0.0f;
+    private float timeOfDay = 9.0f;
 
     [SerializeField, Range(0.01f, 1.0f)]
     private float timeScale = 1.0f;
@@ -16,7 +16,25 @@ public class SkyboxController : MonoBehaviour
     public AnimationCurve sunCurve;
     public AnimationCurve moonCurve;
 
+    public bool dayNightCycleEnabled = true;
+
+    private void Start()
+    {
+        // update once to set initial values
+        UpdateSunAndMoon();
+    }
+
     private void Update()
+    {
+        if (!dayNightCycleEnabled)
+        {
+            return;
+        }
+
+        UpdateSunAndMoon();
+    }
+
+    private void UpdateSunAndMoon()
     {
         timeOfDay += Time.deltaTime * timeScale;
         timeOfDay %= 24;
