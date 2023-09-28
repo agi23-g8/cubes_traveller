@@ -40,9 +40,4 @@ public class Button : MonoBehaviour, IInteractable
     {
         UITooltip.SetActive(show);
     }
-
-    void Update()
-    {
-        tooltip.transform.LookAt(Camera.main.transform);
-    }
 }
