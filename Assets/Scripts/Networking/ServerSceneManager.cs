@@ -68,23 +68,24 @@ public class ServerSceneManager : MonoBehaviour
         float alpha = (fadeDirection == FadeDirection.Out) ? 0 : 1;
         if (fadeDirection == FadeDirection.Out)
         {
+            fadeOutUIImage.enabled = true;
             while (alpha <= 1)
             {
                 alpha += Time.deltaTime * (1.0f / fadeSpeed);
                 fadeOutUIImage.color = new Color(fadeOutUIImage.color.r, fadeOutUIImage.color.g, fadeOutUIImage.color.b, alpha);
                 yield return null;
             }
-            fadeOutUIImage.enabled = false;
         }
         else
         {
-            fadeOutUIImage.enabled = true;
-            while (alpha >= 0)
+            while (alpha > 0)
             {
                 alpha -= Time.deltaTime * (1.0f / fadeSpeed);
                 fadeOutUIImage.color = new Color(fadeOutUIImage.color.r, fadeOutUIImage.color.g, fadeOutUIImage.color.b, alpha);
                 yield return null;
             }
+            fadeOutUIImage.enabled = false;
+
         }
 
     }
@@ -100,6 +101,7 @@ public class ServerSceneManager : MonoBehaviour
             yield return null;
         }
         async.allowSceneActivation = true;
+        yield return new WaitForSeconds(1);
         yield return Fade(FadeDirection.In);
         isLoadingScene = false;
     }
