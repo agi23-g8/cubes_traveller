@@ -32,12 +32,14 @@ public class ServerSceneManager : MonoBehaviour
     void Update()
     {
         // when the client is connected, load the scene
-        if (networkManager.ConnectedClientsList.Count > 0 && SceneManager.GetActiveScene().buildIndex == 0)
+        if (networkManager.IsServer && networkManager.ConnectedClientsList.Count > 0 && SceneManager.GetActiveScene().buildIndex == 0)
         {
+            Debug.Log("Loading scene 1");
             SceneManager.LoadScene(1);
         }
         else if (SceneManager.GetActiveScene().buildIndex == 1 && networkManager.ConnectedClientsList.Count == 0)
         {
+            Debug.Log("Loading scene 0");
             SceneManager.LoadScene(0);
         }
     }
