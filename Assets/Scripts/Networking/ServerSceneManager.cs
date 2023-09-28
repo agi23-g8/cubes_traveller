@@ -1,13 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ServerSceneManager : MonoBehaviour
 {
     NetworkManager networkManager;
 
+    public Image fadeOutUIImage;
+    public float fadeSpeed = 0.8f;
+
+    private bool isLoadingScene = false;
 
     void Awake()
     {
@@ -31,16 +37,71 @@ public class ServerSceneManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
         // when the client is connected, load the scene
         if (networkManager.IsServer && networkManager.ConnectedClientsList.Count > 0 && SceneManager.GetActiveScene().buildIndex == 0)
         {
-            Debug.Log("Loading scene 1");
-            SceneManager.LoadScene(1);
+            if (!isLoadingScene)
+            {
+                StartCoroutine(FadeAndLoadScene(1));
+            }
+
         }
         else if (SceneManager.GetActiveScene().buildIndex == 1 && networkManager.ConnectedClientsList.Count == 0)
         {
-            Debug.Log("Loading scene 0");
-            SceneManager.LoadScene(0);
+            if (!isLoadingScene)
+            {
+                StartCoroutine(FadeAndLoadScene(0));
+            }
         }
     }
+
+    public enum FadeDirection
+    {
+        In, //Alpha = 1
+        Out // Alpha = 0
+    }
+
+    private IEnumerator Fade(FadeDirection fadeDirection)
+    {
+        float alpha = (fadeDirection == FadeDirection.Out) ? 0 : 1;
+        if (fadeDirection == FadeDirection.Out)
+        {
+            while (alpha <= 1)
+            {
+                alpha += Time.deltaTime * (1.0f / fadeSpeed);
+                fadeOutUIImage.color = new Color(fadeOutUIImage.color.r, fadeOutUIImage.color.g, fadeOutUIImage.color.b, alpha);
+                yield return null;
+            }
+            fadeOutUIImage.enabled = false;
+        }
+        else
+        {
+            fadeOutUIImage.enabled = true;
+            while (alpha >= 0)
+            {
+                alpha -= Time.deltaTime * (1.0f / fadeSpeed);
+                fadeOutUIImage.color = new Color(fadeOutUIImage.color.r, fadeOutUIImage.color.g, fadeOutUIImage.color.b, alpha);
+                yield return null;
+            }
+        }
+
+    }
+
+    public IEnumerator FadeAndLoadScene(int sceneToLoad)
+    {
+        isLoadingScene = true;
+        AsyncOperation async = SceneManager.LoadSceneAsync(sceneToLoad);
+        async.allowSceneActivation = false;
+        yield return Fade(FadeDirection.Out);
+        while (!async.isDone && fadeOutUIImage.color.a < 1)
+        {
+            yield return null;
+        }
+        async.allowSceneActivation = true;
+        yield return Fade(FadeDirection.In);
+        isLoadingScene = false;
+    }
+
 }
