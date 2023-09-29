@@ -448,6 +448,7 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                     inputData.positionCS = _varyings.positionCS;
                     inputData.positionWS = _varyings.positionWS;
                     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(_varyings.positionWS);
+                    inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(_varyings.positionCS);
 
                     float3x3 TBN = float3x3(_varyings.tangentWS, _varyings.bitangentWS, _varyings.normalWS);
                     float3 normalW = TransformTangentToWorld(surfaceData.normalTS, TBN);
@@ -467,24 +468,16 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                     // we don't apply fog in the gbuffer pass
                     inputData.fogCoord = 0;
 
+                    #if defined(LIGHTMAP_ON)
+                        inputData.shadowMask = SAMPLE_SHADOWMASK(_varyings.staticLightmapUV);
+                    #else
+                        inputData.shadowMask = float4(0, 0, 0, 0);
+                    #endif
+
                     #if defined(DYNAMICLIGHTMAP_ON)
                         inputData.bakedGI = SAMPLE_GI(_varyings.staticLightmapUV, _varyings.dynamicLightmapUV, _varyings.vertexSH, inputData.normalWS);
                     #else
                         inputData.bakedGI = SAMPLE_GI(_varyings.staticLightmapUV, _varyings.vertexSH, inputData.normalWS);
-                    #endif
-
-                    inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(_varyings.positionCS);
-                    inputData.shadowMask = SAMPLE_SHADOWMASK(_varyings.staticLightmapUV);
-
-                    #if defined(DEBUG_DISPLAY)
-                        #if defined(DYNAMICLIGHTMAP_ON)
-                            inputData.dynamicLightmapUV = _varyings.dynamicLightmapUV;
-                        #endif
-                        #if defined(LIGHTMAP_ON)
-                            inputData.staticLightmapUV = _varyings.staticLightmapUV;
-                        #else
-                            inputData.vertexSH = _varyings.vertexSH;
-                        #endif
                     #endif
                 }
 
