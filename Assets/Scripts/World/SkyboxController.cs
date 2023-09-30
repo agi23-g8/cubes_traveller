@@ -13,6 +13,12 @@ public class SkyboxController : MonoBehaviour
     [SerializeField, Range(1.0f, 3600.0f)]
     private float timeScale = 1.0f;
 
+    [SerializeField, Range(0.0f, 10.0f)]
+    private float sunIntensity = 1.0f;
+
+    [SerializeField, Range(0.0f, 10.0f)]
+    private float moonIntensity = 1.0f;
+
     public AnimationCurve sunCurve;
     public AnimationCurve moonCurve;
 
@@ -45,7 +51,7 @@ public class SkyboxController : MonoBehaviour
         sun.transform.localRotation = Quaternion.Euler(new Vector3(n_time * 360f - 90f, -30f, 0));
         moon.transform.localRotation = Quaternion.Euler(new Vector3(n_time * 360f + 90f, -30f, 0));
 
-        sun.intensity = sunCurve.Evaluate(n_time);
-        moon.intensity = moonCurve.Evaluate(n_time);
+        sun.intensity = sunCurve.Evaluate(n_time) * sunIntensity;
+        moon.intensity = moonCurve.Evaluate(n_time) * moonIntensity;
     }
 }
