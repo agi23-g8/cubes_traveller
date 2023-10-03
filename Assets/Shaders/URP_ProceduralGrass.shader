@@ -388,7 +388,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
 
                     float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
-                    float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
+                    float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff) * grassVisibility;
                     float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
 
                     // Create blade segments by adding two vertices at once.

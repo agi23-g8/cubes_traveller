@@ -87,6 +87,7 @@ public class PlayerController : MonoBehaviour
         // rotate the player to align with the face normal
         // TODO: rework this after demo
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation;
+        targetRotation = Quaternion.FromToRotation(transform.forward, moveDir) * targetRotation;
         rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, 0.4f));
 
         // apply gravity
