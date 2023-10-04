@@ -1,44 +1,35 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SkyboxController : MonoBehaviour
 {
     public Material skybox;
 
-    public Light sun;
-    public Light moon;
-
-    public Transform sunAndMoon;
-
-    [SerializeField, Range(0, 24)]
-    private float timeOfDay = 9.0f;
-
-    [SerializeField, Range(1.0f, 3600.0f)]
-    private float timeScale = 1.0f;
-
     public bool dayNightCycleEnabled = true;
 
-    public Gradient skyColor;
-    public Gradient fogColor;
-    public Gradient sunColor;
+    [SerializeField, Range(1.0f, 20.0f)]
+    private float timeScale = 1.0f;
+
+    [Header("Sun Settings")]
+
+    public Light sun;
+    public Gradient skyDayColor;
+    public Gradient fogDayColor;
 
     public int sunNoonTemperature = 6500;
     public int sunSetTemperature = 2000;
 
-    public AnimationCurve sunIntensity;
+    [Header("Moon Settings")]
 
-    [Header("Debug")]
+    public Light moon;
+    public Gradient skyNightColor;
+    public Gradient fogNightColor;
 
-    [SerializeField]
-    private float n_time = 0.5f;
+    [Header("Debug (do not edit)")]
 
-    private void Start()
-    {
-        // update once to set initial values
-        UpdateSky();
-    }
+    [SerializeField] private float n_time;
+    [SerializeField] private bool day;
+    [SerializeField] private bool night;
 
     private void Update()
     {
@@ -47,42 +38,81 @@ public class SkyboxController : MonoBehaviour
             return;
         }
 
-        UpdateSky();
+        UpdateSunAndMoon();
+
+        if (day)
+        {
+            n_time = sun.transform.rotation.eulerAngles.x / 90f;
+            n_time = Mathf.Clamp(n_time, 0, 1);
+            UpdateSkyDayColor();
+        }
+        else if (night)
+        {
+            n_time = moon.transform.rotation.eulerAngles.x / 90f;
+            n_time = Mathf.Clamp(n_time, 0, 1);
+            UpdateSkyNightColor();
+        }
     }
 
-    private void UpdateSky()
+    private void UpdateSunAndMoon()
     {
-        timeOfDay += Time.deltaTime * timeScale / 3600;
-        timeOfDay %= 24;
+        sun.transform.Rotate(Time.deltaTime * timeScale, 0, 0);
+        moon.transform.Rotate(Time.deltaTime * timeScale, 0, 0);
 
-        // normalize timeOfDay to 0..1
-        // n_time | day/night
-        // 0      | night
-        // 0.25   | morning
-        // 0.5    | noon
-        // 0.75   | evening
-        // 1      | night
-        n_time = timeOfDay / 24;
+        if (sun.transform.rotation.eulerAngles.x < 90)
+        {
+            sun.enabled = true;
+            day = true;
+            night = false;
 
-        Color sky = skyColor.Evaluate(n_time);
-        Color fog = fogColor.Evaluate(n_time);
+            float theta = sun.transform.rotation.eulerAngles.x;
+            float intensity = Mathf.Sin(Mathf.Deg2Rad * theta);
+            sun.intensity = Mathf.Clamp(intensity, 0, 1);
+
+            float temperature = sunSetTemperature + (sunNoonTemperature - sunSetTemperature) * intensity;
+            sun.colorTemperature = temperature;
+        }
+        else
+        {
+            sun.enabled = false;
+            day = false;
+            night = true;
+        }
+
+        if (moon.transform.rotation.eulerAngles.x < 90)
+        {
+            moon.enabled = true;
+            day = false;
+            night = true;
+
+            float theta = moon.transform.rotation.eulerAngles.x;
+            float intensity = Mathf.Clamp(Mathf.Sin(Mathf.Deg2Rad * theta), 0, 0.5f);
+            moon.intensity = intensity;
+
+            float darknessFactor = 1.25f;
+            RenderSettings.ambientIntensity = 1 - intensity * darknessFactor;
+        }
+        else
+        {
+            moon.enabled = false;
+            day = true;
+            night = false;
+        }
+    }
+
+    private void UpdateSkyDayColor()
+    {
+        Color sky = skyDayColor.Evaluate(n_time);
+        Color fog = fogDayColor.Evaluate(n_time);
         skybox.SetColor("_SkyColor", sky);
         skybox.SetColor("_FogColor", fog);
-
-        UpdateSunAndMoon(n_time);
     }
 
-    private void UpdateSunAndMoon(float n_time)
+    private void UpdateSkyNightColor()
     {
-        // n_time | rotation
-        // 0      | 180
-        // 0.25   | 90
-        // 0.5    | 0
-        // 0.75   | -90
-        // 1      | -180
-        sunAndMoon.rotation = Quaternion.Euler(180 - n_time * 360, 0, 0);
-
-        float si = sunIntensity.Evaluate(n_time);
-        sun.intensity = si;
+        Color sky = skyNightColor.Evaluate(n_time);
+        Color fog = fogNightColor.Evaluate(n_time);
+        skybox.SetColor("_SkyColor", sky);
+        skybox.SetColor("_FogColor", fog);
     }
 }
