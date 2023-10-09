@@ -1665,7 +1665,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 3
+  m_Antialiasing: 2
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 1
@@ -3623,17 +3623,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 37fbad68789effc46b85930086919f66,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.556
+      value: 0.541
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 37fbad68789effc46b85930086919f66,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.7877
+      value: 1.733
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 37fbad68789effc46b85930086919f66,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.533
+      value: 1.54
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 37fbad68789effc46b85930086919f66,
         type: 3}
@@ -4563,6 +4563,36 @@ PrefabInstance:
         type: 3}
       propertyPath: sunCurve.m_Curve.Array.data[2].outWeight
       value: 0.80376184
+      objectReference: {fileID: 0}
+    - target: {fileID: 6130408718543000883, guid: 8c07d9954870fb74c801cc6e210d0265,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.107988834
+      objectReference: {fileID: 0}
+    - target: {fileID: 6130408718543000883, guid: 8c07d9954870fb74c801cc6e210d0265,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.9940541
+      objectReference: {fileID: 0}
+    - target: {fileID: 6130408718543000883, guid: 8c07d9954870fb74c801cc6e210d0265,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.0015078982
+      objectReference: {fileID: 0}
+    - target: {fileID: 6130408718543000883, guid: 8c07d9954870fb74c801cc6e210d0265,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.013880438
+      objectReference: {fileID: 0}
+    - target: {fileID: 6130408718543000883, guid: 8c07d9954870fb74c801cc6e210d0265,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 167.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6130408718543000883, guid: 8c07d9954870fb74c801cc6e210d0265,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -1.6
       objectReference: {fileID: 0}
     - target: {fileID: 6307856384963451193, guid: 8c07d9954870fb74c801cc6e210d0265,
         type: 3}
