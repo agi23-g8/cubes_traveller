@@ -118,7 +118,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
                 volumetricLightMaterial.SetFloat("_GaussAmount", volumetricEffect.gaussBlurAmount.value);
                 volumetricLightMaterial.SetInt("_GaussSamples", volumetricEffect.gaussBlurSamples.value);
 
-                RaymarchPass(cmd, cameraColorTargetHandle);
+                VolumetricPass(cmd, cameraColorTargetHandle);
 
             }
             context.ExecuteCommandBuffer(cmd);
@@ -126,7 +126,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
             CommandBufferPool.Release(cmd);
         }
 
-        private void RaymarchPass(CommandBuffer cmd, RTHandle source)
+        private void VolumetricPass(CommandBuffer cmd, RTHandle source)
         {
             var original = source.rt.descriptor;
             var singleChannel = new RenderTextureDescriptor(original.width, original.height, RenderTextureFormat.R16, 0);
@@ -136,8 +136,6 @@ public class VolumetricLightFeature : ScriptableRendererFeature
 
             // raymarch depth
             Blitter.BlitCameraTexture(cmd, source, raymarchTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, volumetricLightMaterial, 0);
-            // Blitter.BlitCameraTexture(cmd, raymarchTarget, source);
-            // return;
 
             // bilateral blur X
             Blitter.BlitCameraTexture(cmd, raymarchTarget, lowResDepthTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, volumetricLightMaterial, 1);
