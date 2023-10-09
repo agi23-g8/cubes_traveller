@@ -17,6 +17,11 @@ public class VolumetricLightFeature : ScriptableRendererFeature
     private VolumetricLightRenderPass volumetricLightRenderPass;
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
+        if (renderingData.cameraData.cameraType != CameraType.Game && renderingData.cameraData.cameraType != CameraType.SceneView)
+        {
+            return;
+        }
+
         if (volumetricLightRenderPass == null)
         {
             return;
@@ -35,13 +40,14 @@ public class VolumetricLightFeature : ScriptableRendererFeature
 
     public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
     {
-
-        if (renderingData.cameraData.cameraType == CameraType.Game || renderingData.cameraData.cameraType == CameraType.SceneView)
+        if (renderingData.cameraData.cameraType != CameraType.Game && renderingData.cameraData.cameraType != CameraType.SceneView)
         {
-            volumetricLightRenderPass.ConfigureInput(ScriptableRenderPassInput.Depth);
-            volumetricLightRenderPass.ConfigureInput(ScriptableRenderPassInput.Color);
-            volumetricLightRenderPass.SetTarget(renderer.cameraColorTargetHandle);
+            return;
         }
+        volumetricLightRenderPass.ConfigureInput(ScriptableRenderPassInput.Depth);
+        volumetricLightRenderPass.ConfigureInput(ScriptableRenderPassInput.Color);
+        volumetricLightRenderPass.SetTarget(renderer.cameraColorTargetHandle);
+
     }
 
     public override void Create()
@@ -61,6 +67,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
     protected override void Dispose(bool disposing)
     {
         CoreUtils.Destroy(volumetricLightMaterial);
+        volumetricLightRenderPass.Dispose();
     }
 
 
@@ -86,6 +93,11 @@ public class VolumetricLightFeature : ScriptableRendererFeature
         {
             descriptor = renderingData.cameraData.cameraTargetDescriptor;
         }
+
+        // public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
+        // {
+        //     ConfigureTarget(cameraColorTargetHandle);
+        // }
 
         public void SetTarget(RTHandle cameraColorTargetHandle)
         {
@@ -118,8 +130,10 @@ public class VolumetricLightFeature : ScriptableRendererFeature
 
         private void VolumetricPass(CommandBuffer cmd, RTHandle source)
         {
-            var original = source.rt.descriptor;
-            var singleChannel = new RenderTextureDescriptor(original.width, original.height, RenderTextureFormat.R16, 0);
+            RenderTextureDescriptor original = GetCompatibleDescriptor(descriptor, descriptor.width, descriptor.height, descriptor.graphicsFormat);
+            RenderTextureDescriptor singleChannel = GetCompatibleDescriptor(descriptor, descriptor.width, descriptor.height, descriptor.graphicsFormat, DepthBits.None);
+            singleChannel.colorFormat = RenderTextureFormat.R16;
+            // var singleChannel = new RenderTextureDescriptor(original.width, original.height, RenderTextureFormat.R16, 0);
             RenderingUtils.ReAllocateIfNeeded(ref raymarchTarget, singleChannel, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "Volumetric Light Target");
             RenderingUtils.ReAllocateIfNeeded(ref lowResDepthTarget, singleChannel, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "Low Res Depth Target");
             RenderingUtils.ReAllocateIfNeeded(ref compositeTarget, original, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "Composite Target");
@@ -141,6 +155,13 @@ public class VolumetricLightFeature : ScriptableRendererFeature
             // composite
             Blitter.BlitCameraTexture(cmd, source, compositeTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, volumetricLightMaterial, 3);
             Blitter.BlitCameraTexture(cmd, compositeTarget, source);
+        }
+
+        public void Dispose()
+        {
+            RTHandles.Release(raymarchTarget);
+            RTHandles.Release(lowResDepthTarget);
+            RTHandles.Release(compositeTarget);
         }
 
 
