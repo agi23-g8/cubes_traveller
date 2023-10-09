@@ -87,8 +87,6 @@ Shader "Hidden/Universal Render Pipeline/Volumetric Light"
                 Light mainLight = GetMainLight(shadowCoord);
                 half3 lightDir = mainLight.direction;
                 half shadowAttenuation = mainLight.shadowAttenuation;
-                //half shadowAttenuation = ShadowAtten(currentPosition);
-                //return half3(shadowAttenuation, shadowAttenuation, shadowAttenuation);
                 // if it is in light
                 if (shadowAttenuation > 0) {    
                     half kernelColor = ComputeScattering(dot(rayDirection, lightDir));
@@ -182,6 +180,7 @@ Shader "Hidden/Universal Render Pipeline/Volumetric Light"
             
             
             /// TEMP //////////////////////
+            // WE are not using downsampling for now
             half4 shadowCoord = TransformWorldToShadowCoord(GetWorldPos(input.texcoord));
             Light mainLight = GetMainLight(shadowCoord);
             half3 lightDir = mainLight.direction;
@@ -196,7 +195,7 @@ Shader "Hidden/Universal Render Pipeline/Volumetric Light"
             return half4(finalColor, 1);
             /// TEMP //////////////////////
 
-
+            // The following code is if we want to use downsampling to improve performance
             /*
             int offset = 0;
             half d0 = SampleSceneDepth(input.texcoord);
@@ -247,7 +246,8 @@ Shader "Hidden/Universal Render Pipeline/Volumetric Light"
             return half4(finalColor, 1);*/
         }
 
-
+        // This pass is used to sample the depth texture
+        // It will be used properly if we want to use downsampling
         half SampleDepth(Varyings input) : SV_Target {
             #if UNITY_REVERSED_Z
                 real depth = SampleSceneDepth(input.texcoord);
