@@ -12,11 +12,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
     [SerializeField]
     private Shader volumetricLightShader;
 
-    [SerializeField]
-    private Shader compositeShader;
-
     private Material volumetricLightMaterial;
-    private Material compositeMaterial;
 
     private VolumetricLightRenderPass volumetricLightRenderPass;
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
@@ -44,7 +40,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
         {
             volumetricLightRenderPass.ConfigureInput(ScriptableRenderPassInput.Depth);
             volumetricLightRenderPass.ConfigureInput(ScriptableRenderPassInput.Color);
-            volumetricLightRenderPass.SetTarget(renderer.cameraColorTargetHandle, renderer.cameraDepthTargetHandle);
+            volumetricLightRenderPass.SetTarget(renderer.cameraColorTargetHandle);
         }
     }
 
@@ -56,8 +52,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
             return;
         }
         volumetricLightMaterial = CoreUtils.CreateEngineMaterial(volumetricLightShader);
-        compositeMaterial = CoreUtils.CreateEngineMaterial(compositeShader);
-        volumetricLightRenderPass = new VolumetricLightRenderPass(volumetricLightMaterial, compositeMaterial)
+        volumetricLightRenderPass = new VolumetricLightRenderPass(volumetricLightMaterial)
         {
             renderPassEvent = renderPassEvent
         };
@@ -66,7 +61,6 @@ public class VolumetricLightFeature : ScriptableRendererFeature
     protected override void Dispose(bool disposing)
     {
         CoreUtils.Destroy(volumetricLightMaterial);
-        CoreUtils.Destroy(compositeMaterial);
     }
 
 
@@ -74,10 +68,8 @@ public class VolumetricLightFeature : ScriptableRendererFeature
     public class VolumetricLightRenderPass : ScriptableRenderPass
     {
         private Material volumetricLightMaterial;
-        private Material compositeMaterial;
         private RenderTextureDescriptor descriptor;
         private RTHandle cameraColorTargetHandle;
-        private RTHandle cameraDepthTargetHandle;
         private RTHandle raymarchTarget;
         private RTHandle lowResDepthTarget;
         private RTHandle compositeTarget;
@@ -85,7 +77,6 @@ public class VolumetricLightFeature : ScriptableRendererFeature
         public VolumetricLightRenderPass(Material volumetricLightMaterial, Material compositeMaterial)
         {
             this.volumetricLightMaterial = volumetricLightMaterial;
-            this.compositeMaterial = compositeMaterial;
             raymarchTarget = RTHandles.Alloc(raymarchTarget, name: "Volumetric Light Target");
             lowResDepthTarget = RTHandles.Alloc(lowResDepthTarget, name: "Low Res Depth Target");
             compositeTarget = RTHandles.Alloc(compositeTarget, name: "Composite Target");
@@ -96,10 +87,9 @@ public class VolumetricLightFeature : ScriptableRendererFeature
             descriptor = renderingData.cameraData.cameraTargetDescriptor;
         }
 
-        public void SetTarget(RTHandle cameraColorTargetHandle, RTHandle cameraDepthTargetHandle)
+        public void SetTarget(RTHandle cameraColorTargetHandle)
         {
             this.cameraColorTargetHandle = cameraColorTargetHandle;
-            this.cameraDepthTargetHandle = cameraDepthTargetHandle;
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
