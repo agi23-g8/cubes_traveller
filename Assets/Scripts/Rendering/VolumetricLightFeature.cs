@@ -74,7 +74,7 @@ public class VolumetricLightFeature : ScriptableRendererFeature
         private RTHandle lowResDepthTarget;
         private RTHandle compositeTarget;
         private VolumetricEffectComponent volumetricEffect;
-        public VolumetricLightRenderPass(Material volumetricLightMaterial, Material compositeMaterial)
+        public VolumetricLightRenderPass(Material volumetricLightMaterial)
         {
             this.volumetricLightMaterial = volumetricLightMaterial;
             raymarchTarget = RTHandles.Alloc(raymarchTarget, name: "Volumetric Light Target");
