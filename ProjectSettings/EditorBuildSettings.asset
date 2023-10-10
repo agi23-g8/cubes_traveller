@@ -7,11 +7,8 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/HostMenu.unity
-    guid: 25263d38eae6fb94da9567cfca764c8c
+    guid: 318b675f1157c1143ac175da2635acf5
   - enabled: 1
-    path: Assets/Scenes/cube_test.unity
-    guid: 4ea911382269999468d011a51bd060a0
-  - enabled: 0
-    path: Assets/Scenes/ClientMenu.unity
-    guid: 14e80e89ea6437546b0e1899bf6c0217
+    path: Assets/Scenes/ForskarFredag.unity
+    guid: ba885b8c88a8230419fc2f7f2999e8f6
   m_configObjects: {}

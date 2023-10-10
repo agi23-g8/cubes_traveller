@@ -28,6 +28,12 @@ public class HostUI : MonoBehaviour
     {
         startHostDialog.SetActive(!networkManager.IsServer);
         waitingForClientDialog.SetActive(networkManager.IsServer && networkManager.ConnectedClients.Count == 0);
+
+        if (Input.GetButton("Interact"))
+        {
+            StartDiscovery();
+        }
+
     }
 
     public void StartDiscovery()
