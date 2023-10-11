@@ -16,6 +16,8 @@ public class SkyboxController : MonoBehaviour
     public Gradient skyDayColor;
     public Gradient fogDayColor;
 
+    public float sunIntensityFactor = 1.5f;
+
     public int sunNoonTemperature = 6500;
     public int sunSetTemperature = 2000;
 
@@ -25,11 +27,16 @@ public class SkyboxController : MonoBehaviour
     public Gradient skyNightColor;
     public Gradient fogNightColor;
 
+    public float moonIntensityFactor = 1.5f;
+
     [Header("Debug (do not edit)")]
 
     [SerializeField] private float n_time;
     [SerializeField] private bool day;
     [SerializeField] private bool night;
+
+    [SerializeField] private float s_intensity;
+    [SerializeField] private float m_intensity;
 
     private void Update()
     {
@@ -61,42 +68,25 @@ public class SkyboxController : MonoBehaviour
 
         if (sun.transform.rotation.eulerAngles.x < 90)
         {
-            sun.enabled = true;
             day = true;
             night = false;
 
             float theta = sun.transform.rotation.eulerAngles.x;
-            float intensity = Mathf.Sin(Mathf.Deg2Rad * theta);
-            sun.intensity = Mathf.Clamp(intensity, 0, 1);
+            s_intensity = Mathf.Sin(Mathf.Deg2Rad * theta) * sunIntensityFactor;
+            sun.intensity = s_intensity;
 
-            float temperature = sunSetTemperature + (sunNoonTemperature - sunSetTemperature) * intensity;
+            float temperature = sunSetTemperature + (sunNoonTemperature - sunSetTemperature) * s_intensity;
             sun.colorTemperature = temperature;
-        }
-        else
-        {
-            sun.enabled = false;
-            day = false;
-            night = true;
         }
 
         if (moon.transform.rotation.eulerAngles.x < 90)
         {
-            moon.enabled = true;
             day = false;
             night = true;
 
             float theta = moon.transform.rotation.eulerAngles.x;
-            float intensity = Mathf.Clamp(Mathf.Sin(Mathf.Deg2Rad * theta), 0, 0.5f);
-            moon.intensity = intensity;
-
-            float darknessFactor = 1.25f;
-            RenderSettings.ambientIntensity = 1 - intensity * darknessFactor;
-        }
-        else
-        {
-            moon.enabled = false;
-            day = true;
-            night = false;
+            m_intensity = Mathf.Clamp(Mathf.Sin(Mathf.Deg2Rad * theta), 0, 0.5f) * moonIntensityFactor;
+            moon.intensity = m_intensity;
         }
     }
 
