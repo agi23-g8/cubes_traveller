@@ -25,111 +25,46 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
         _WindMap("Wind Offset Map", 2D) = "bump" {}
         _WindVelocity("Wind Velocity", Vector) = (1, 0, 0, 0)
         _WindFrequency("Wind Pulse Frequency", Range(0, 1)) = 0.01
+
+        // unity lighting
+        [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
     }
 
     SubShader
     {
         Tags
         {
-            "RenderType" = "Opaque"
             "Queue" = "Geometry"
+            "RenderType" = "Opaque"
             "RenderPipeline" = "UniversalPipeline"
             "UniversalMaterialType" = "Lit"
             "IgnoreProjector" = "True"
         }
-        LOD 300
-        Cull Off
 
+        LOD 300
+
+        // COMMON
         HLSLINCLUDE
 
-            // -------------------------------------
-            // Includes
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
             // -------------------------------------
-            // Universal Pipeline keywords
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
-
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
-            #pragma multi_compile _ LIGHTMAP_ON
-            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
-            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
-            #pragma multi_compile _ SHADOWS_SHADOWMASK
-            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
-
-            /*********************************
-            *        Vertex attributes       *
-            *********************************/
-            struct VertexAttributes
-            {
-                float4 position : POSITION;
-                float3 normal : NORMAL;
-                float4 tangent : TANGENT;
-                float2 texCoord : TEXCOORD0;
-
-                float2 staticLightmapUV : TEXCOORD1;
-                float2 dynamicLightmapUV : TEXCOORD2;
-            };
-
-            /*********************************
-            *         Shader varyings        *
-            *********************************/
-            struct VertexVaryings
-            {
-                float4 position  : SV_POSITION;
-                float3 normal  : NORMAL;
-                float4 tangent : TANGENT;
-                float2 uv      : TEXCOORD0;
-
-                #ifdef LIGHTMAP_ON
-                    float2 staticLightmapUV : TEXCOORD2;
-                #endif
-
-                #ifdef DYNAMICLIGHTMAP_ON
-                    float2 dynamicLightmapUV : TEXCOORD3;
-                #endif
-            };
-
-            struct TessellationFactors
-            {
-                float edge[3] : SV_TessFactor;
-                float inside  : SV_InsideTessFactor;
-            };
-
-            struct GeometryVaryings
-            {
-                float4 positionCS : SV_POSITION;
-                float3 normalWS   : NORMAL;
-                float2 uv         : TEXCOORD0;
-                float3 positionWS : TEXCOORD1;
-
-                #ifdef LIGHTMAP_ON
-                    float2 staticLightmapUV : TEXCOORD2;
-                #else
-                    half3 vertexSH : TEXCOORD2;
-                #endif
-
-                #ifdef DYNAMICLIGHTMAP_ON
-                    float2 dynamicLightmapUV : TEXCOORD3;
-                #endif
-            };
-
-            /*********************************
-            *        Shader resources        *
-            *********************************/
+            // Shader constants
             #define UNITY_PI 3.14159265359f
             #define UNITY_TWO_PI 6.28318530718f
             #define BLADE_SEGMENTS 4
 
+            // -------------------------------------
+            // Material textures
             sampler2D _BladeTexture;
             sampler2D _GrassMap;
             sampler2D _WindMap;
 
+            // -------------------------------------
+            // Material buffer
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _TipColor;
@@ -153,14 +88,11 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float  _WindFrequency;
             CBUFFER_END
 
-            /*********************************
-            *         Shader helpers         *
-            *********************************/
+            // -------------------------------------
+            // Helper functions
 
-            // Simple noise function, sourced from http://answers.unity.com/answers/624136/view.html
-            // Extended discussion on this function can be found at the following link:
-            // https://forum.unity.com/threads/am-i-over-complicating-this-random-function.454887/#post-2949326
-            // Returns a number in the 0...1 range.
+            // Simple noise function returning a float in [0, 1], sourced from:
+            // http://answers.unity.com/answers/624136/view.html
             float GenerateRandom(float3 _seed)
             {
                 return frac(sin(dot(_seed, float3(12.9898, 78.233, 53.539))) * 43758.5453);
@@ -186,35 +118,87 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 );
             }
 
-            // Geometry functions derived from Roystan's tutorial:
-            // https://roystan.net/articles/grass-shader.html
-            // This function applies a transformation (during the geometry shader),
-            // converting to clip space in the process.
-            GeometryVaryings TransformGeomToClip(float3 _origin, float3 _normal, float3 _offset, float3x3 _transform, float2 _uv, float2 _staticLightmapUV, float2 _dynamicLightmapUV)
+        ENDHLSL
+
+        // SHADOW PASS
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode" = "ShadowCaster" }
+
+            // -------------------------------------
+            // Pipeline states
+            ZWrite On
+            ZTest LEqual
+            Cull Off
+            ColorMask 0
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // Deferred Rendering Path does not support the OpenGL-based graphics APIs
+            #pragma exclude_renderers gles3 glcore
+            
+            // Make sure geometry and tesselation shaders are supported.
+            #pragma require geometry
+            #pragma require tessellation tessHW
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex   ShadowPassVertex
+            #pragma hull     ShadowPassHull
+            #pragma domain   ShadowPassDomain
+            #pragma geometry ShadowPassGeometry
+            #pragma fragment ShadowPassFragment
+
+            // this is used during shadow map generation to differentiate between directional 
+            // and punctual light shadows, as they use different formulas to apply Normal Bias
+            #pragma multi_compile_geometry _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+
+            // Shadow casting light geometric parameters. These variables are used when applying the shadow normal bias and are 
+            // set by ShadowUtils::SetupShadowCasterConstantBuffer in com.unity.render-pipelines.universal/Runtime/ShadowUtils.cs
+            float3 _LightDirection;
+            float3 _LightPosition;
+
+            // -------------------------------------
+            // Shader structures
+
+            struct VertexAttributes
             {
-                GeometryVaryings varyings;
+                float4 position : POSITION;
+                float3 normal   : NORMAL;
+                float4 tangent  : TANGENT;
+                float2 texCoord : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
 
-                varyings.positionCS = TransformObjectToHClip(_origin + mul(_transform, _offset));
-                varyings.uv = _uv;
+            struct VertexVaryings
+            {
+                float4 position : SV_POSITION;
+                float3 normal   : NORMAL;
+                float4 tangent  : TANGENT;
+                float2 uv       : TEXCOORD0;
+            };
 
-                varyings.positionWS = TransformObjectToWorld(_origin + mul(_transform, _offset));
-                varyings.normalWS = TransformObjectToWorldNormal(_normal);
+            struct TessellationFactors
+            {
+                float edge[3] : SV_TessFactor;
+                float inside  : SV_InsideTessFactor;
+            };
 
-                #ifdef LIGHTMAP_ON
-                    varyings.staticLightmapUV = _staticLightmapUV;
-                #else
-                    OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
-                #endif
+            struct GeometryVaryings
+            {
+                float4 positionCS : SV_POSITION;
+            };
 
-                #ifdef DYNAMICLIGHTMAP_ON
-                    varyings.dynamicLightmapUV = _dynamicLightmapUV;
-                #endif
+            // -------------------------------------
+            // Helper functions
 
-                return varyings;
-            }
-
-            // This function lets us derive the tessellation factor for an edge
-            // from the vertices.
+            // This function lets us derive the tessellation factor for an edge from the vertices.
             float TessellationEdgeFactor(VertexAttributes _vertexA, VertexAttributes _vertexB)
             {
                 float3 v0 = _vertexA.position.xyz;
@@ -223,10 +207,8 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 return edgeLength / _TessellationGrassDistance;
             }
 
-            // The patch constant function is where we create new control
-            // points on the patch. For the edges, increasing the tessellation
-            // factors adds new vertices on the edge. Increasing the inside
-            // will add more 'layers' inside the new triangle.
+            // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
+            // factors will add new vertices on the edge. Increasing the inside will add more 'layers' inside the new triangle.
             TessellationFactors PatchConstantFunction(InputPatch<VertexAttributes, 3> _patch)
             {
                 TessellationFactors f;
@@ -237,13 +219,207 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 return f;
             }
 
-        ENDHLSL
+            // Geometry functions derived from Roystan's tutorial: https://roystan.net/articles/grass-shader.html
+            // This function applies a transformation (during the geometry shader), converting to clip space in the process.
+            GeometryVaryings TransformGeomToClip(float3 _origin, float3 _normal, float3 _offset, float3x3 _transform)
+            {
+                GeometryVaryings varyings;
+
+                float3 localPosition = _origin + mul(_transform, _offset);
+                float3 positionWS = TransformObjectToWorld(localPosition);
+
+                float3 localNormal = normalize(mul(_transform, _normal));
+                float3 normalWS = TransformObjectToWorldNormal(localNormal);
+
+                #if _CASTING_PUNCTUAL_LIGHT_SHADOW
+                    float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+                #else
+                    float3 lightDirectionWS = _LightDirection;
+                #endif
+
+                varyings.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+
+                #if UNITY_REVERSED_Z
+                    varyings.positionCS.z = min(varyings.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                #else
+                    varyings.positionCS.z = max(varyings.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                #endif
+
+                return varyings;
+            }
+
+            /*********************************
+            *          Vertex shader         *
+            *********************************/
+            VertexVaryings ShadowPassVertex(VertexAttributes _attributes)
+            {
+                VertexVaryings varyings;
+                UNITY_SETUP_INSTANCE_ID(_attributes);
+
+                varyings.position = _attributes.position;
+                varyings.normal = _attributes.normal;
+                varyings.tangent = _attributes.tangent;
+                varyings.uv = _attributes.texCoord;
+
+                return varyings;
+            }
+
+            /*********************************
+            *       Tesselation shader       *
+            *********************************/
+
+            // The hull function is the first half of the tessellation shader. It operates on each patch (in our 
+            // case, a patch is a triangle), and outputs new control points for the other tessellation stages.
+            [domain("tri")]
+            [outputcontrolpoints(3)]
+            [outputtopology("triangle_cw")]
+            [partitioning("integer")]
+            [patchconstantfunc("PatchConstantFunction")]
+            VertexAttributes ShadowPassHull(InputPatch<VertexAttributes, 3> _patch, uint _id : SV_OutputControlPointID)
+            {
+                return _patch[_id];
+            }
+
+            // The domain function is the second half of the tessellation shader. It interpolates 
+            // the properties of the vertices (position, normal, etc.) to create new vertices.
+            [domain("tri")]
+            VertexVaryings ShadowPassDomain(TessellationFactors _factors, OutputPatch<VertexAttributes, 3> _patch, float3 _barycentricCoordinates : SV_DomainLocation)
+            {
+                VertexAttributes vertex;
+
+                #define INTERPOLATE(fieldname) vertex.fieldname = \
+                    _patch[0].fieldname * _barycentricCoordinates.x + \
+                    _patch[1].fieldname * _barycentricCoordinates.y + \
+                    _patch[2].fieldname * _barycentricCoordinates.z;
+
+                INTERPOLATE(position)
+                INTERPOLATE(normal)
+                INTERPOLATE(tangent)
+                INTERPOLATE(texCoord)
+
+                return ShadowPassVertex(vertex);
+            }
+
+            /*********************************
+            *         Geometry shader        *
+            *********************************/
+            [maxvertexcount(BLADE_SEGMENTS * 2 + 1)]
+            void ShadowPassGeometry(point VertexVaryings _input[1], inout TriangleStream<GeometryVaryings> _triStream_)
+            {
+                float2 uv = _input[0].uv;
+                float grassVisibility = tex2Dlod(_GrassMap, float4(uv, 0, 0)).r;
+
+                // Early discards when the grass threshold is not reached.
+                if (grassVisibility < _GrassThreshold)
+                {
+                    return;
+                }
+
+                // local space vectors
+                float3 origin = _input[0].position.xyz;
+                float3 normal = _input[0].normal;
+                float4 tangent = _input[0].tangent;
+                float3 bitangent = cross(normal, tangent.xyz) * tangent.w;
+
+                float3x3 tangentToLocal = float3x3
+                (
+                    tangent.x, bitangent.x, normal.x,
+                    tangent.y, bitangent.y, normal.y,
+                    tangent.z, bitangent.z, normal.z
+                );
+
+                // Rotate around the y-axis a random amount.
+                float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
+
+                // Rotate around the bottom of the blade a random amount.
+                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+
+                float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+                float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
+                windSample = 2 * windSample - 1;
+                windSample *= length(_WindVelocity);
+                float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+
+                // Rotate around wind matrix.
+                float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+
+                // Transform the grass blades to the correct tangent space.
+                float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
+                float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
+
+                float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
+
+                float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
+                float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
+                float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
+                float exponent = _BladeBendCurve;
+
+                // Create blade segments by adding two vertices at once.
+                for (int i = 0; i < BLADE_SEGMENTS; ++i)
+                {
+                    float t = i / (float)BLADE_SEGMENTS;
+                    float3x3 transform = (i == 0) ? baseTransformationMatrix : tipTransformationMatrix;
+
+                    // - The blade curve lies in the YZ plane (tangent space)
+                    // - Its parametric equation is C(t) -> [y = forward * t^(exponent), z = height * t]
+                    // - The blade width is inversely proportional to its height
+                    float3 offset;
+                    offset.x = width * (1 - t);
+                    offset.y = pow(t, exponent) * forward;
+                    offset.z = height * t;
+
+                    // - The curve tangent is equal to the curbe derivative : [forward * exponent * t^(exponent - 1), height]
+                    // - The normal can then be obtained by rotating the tangent at 90° : (-tanZ, tanY)
+                    float3 normalT;
+                    normalT.x = 0.f;
+                    normalT.y = -height;
+                    normalT.z = forward * exponent * pow(t, max(0.01, exponent - 1));
+                    normalT = normalize(normalT);
+
+                    _triStream_.Append(TransformGeomToClip(origin, normalT, float3( offset.x, offset.y, offset.z), transform));
+                    _triStream_.Append(TransformGeomToClip(origin, normalT, float3(-offset.x, offset.y, offset.z), transform));
+                }
+
+                // Add the final vertex (t = 1) at the tip of the grass blade.
+                {
+                    float3 offset;
+                    offset.x = 0.f;
+                    offset.y = forward;
+                    offset.z = height;
+
+                    float3 normalT;
+                    normalT.x = 0.f;
+                    normalT.y = -height;
+                    normalT.z = forward * exponent;
+                    normalT = normalize(normalT);
+
+                    _triStream_.Append(TransformGeomToClip(origin, normalT, offset, tipTransformationMatrix));
+                    _triStream_.RestartStrip();
+                }
+            }
+
+            /*********************************
+            *         Fragment shader        *
+            *********************************/
+            half4 ShadowPassFragment(GeometryVaryings _varyings) : SV_TARGET
+            {
+                return 0;
+            }
+
+            ENDHLSL
+        }
 
         // GBUFFER PASS
         Pass
         {
             Name "GBuffer"
             Tags { "LightMode" = "UniversalGBuffer" }
+
+            // -------------------------------------
+            // Pipeline states
+            ZWrite On
+            ZTest LEqual
+            Cull Off
 
             HLSLPROGRAM
             #pragma target 4.5
@@ -256,9 +432,19 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             #pragma require tessellation tessHW
 
             // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
 
             // -------------------------------------
             // Shader Stages
@@ -268,6 +454,131 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             #pragma geometry GBufferPassGeometry
             #pragma fragment GBufferPassFragment
 
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
+
+            // -------------------------------------
+            // Shader structures
+
+            struct VertexAttributes
+            {
+                float4 position : POSITION;
+                float3 normal   : NORMAL;
+                float4 tangent  : TANGENT;
+                float2 texCoord : TEXCOORD0;
+
+                float2 staticLightmapUV : TEXCOORD1;
+                float2 dynamicLightmapUV : TEXCOORD2;
+            };
+
+            struct VertexVaryings
+            {
+                float4 position : SV_POSITION;
+                float3 normal   : NORMAL;
+                float4 tangent  : TANGENT;
+                float2 uv       : TEXCOORD0;
+
+                #if defined(LIGHTMAP_ON)
+                    float2 staticLightmapUV : TEXCOORD1;
+                #endif
+
+                #if defined(DYNAMICLIGHTMAP_ON)
+                    float2 dynamicLightmapUV : TEXCOORD2;
+                #endif
+
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+
+            struct TessellationFactors
+            {
+                float edge[3] : SV_TessFactor;
+                float inside  : SV_InsideTessFactor;
+            };
+
+            struct GeometryVaryings
+            {
+                float4 positionCS : SV_POSITION;
+                float3 normalWS   : NORMAL;
+                float2 uv         : TEXCOORD0;
+                float3 positionWS : TEXCOORD1;
+
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                    float4 shadowCoord : TEXCOORD2;
+                #endif
+
+                #if defined(LIGHTMAP_ON)
+                    float2 staticLightmapUV : TEXCOORD3;
+                #else
+                    half3 vertexSH : TEXCOORD3;
+                #endif
+
+                #if defined(DYNAMICLIGHTMAP_ON)
+                    float2 dynamicLightmapUV : TEXCOORD4;
+                #endif
+            };
+
+            // -------------------------------------
+            // Helper functions
+
+            // This function lets us derive the tessellation factor for an edge from the vertices.
+            float TessellationEdgeFactor(VertexAttributes _vertexA, VertexAttributes _vertexB)
+            {
+                float3 v0 = _vertexA.position.xyz;
+                float3 v1 = _vertexB.position.xyz;
+                float edgeLength = distance(v0, v1);
+                return edgeLength / _TessellationGrassDistance;
+            }
+
+            // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
+            // factors will add new vertices on the edge. Increasing the inside will add more 'layers' inside the new triangle.
+            TessellationFactors PatchConstantFunction(InputPatch<VertexAttributes, 3> _patch)
+            {
+                TessellationFactors f;
+                f.edge[0] = TessellationEdgeFactor(_patch[1], _patch[2]);
+                f.edge[1] = TessellationEdgeFactor(_patch[2], _patch[0]);
+                f.edge[2] = TessellationEdgeFactor(_patch[0], _patch[1]);
+                f.inside = (f.edge[0] + f.edge[1] + f.edge[2]) / 3.0f;
+                return f;
+            }
+
+            // Geometry functions derived from Roystan's tutorial: https://roystan.net/articles/grass-shader.html
+            // This function applies a transformation (during the geometry shader), converting to clip space in the process.
+            GeometryVaryings TransformGeomToClip(float3 _origin, float3 _normal, float3 _offset, float3x3 _transform, float2 _uv, float2 _staticLightmapUV, float2 _dynamicLightmapUV)
+            {
+                GeometryVaryings varyings;
+                varyings.uv = _uv;
+
+                float3 localPosition = _origin + mul(_transform, _offset);
+                varyings.positionWS = TransformObjectToWorld(localPosition);
+                varyings.positionCS = TransformObjectToHClip(localPosition);
+
+                float3 localNormal = normalize(mul(_transform, _normal));
+                varyings.normalWS = TransformObjectToWorldNormal(localNormal);
+
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                    #if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
+                        varyings.shadowCoord =  ComputeScreenPos(varyings.positionCS);
+                    #else
+                        varyings.shadowCoord = TransformWorldToShadowCoord(varyings.positionWS);
+                    #endif
+                #endif
+
+                #if defined(LIGHTMAP_ON)
+                    varyings.staticLightmapUV = _staticLightmapUV;
+                #else
+                    OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
+                #endif
+
+                #if defined(DYNAMICLIGHTMAP_ON)
+                    varyings.dynamicLightmapUV = _dynamicLightmapUV;
+                #endif
+
+                return varyings;
+            }
+
             /*********************************
             *          Vertex shader         *
             *********************************/
@@ -275,18 +586,22 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             {
                 VertexVaryings varyings = (VertexVaryings)0;
 
+                UNITY_SETUP_INSTANCE_ID(_attributes);
+                UNITY_TRANSFER_INSTANCE_ID(_attributes, varyings);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(varyings);
+
                 varyings.position = _attributes.position;
                 varyings.normal = _attributes.normal;
                 varyings.tangent = _attributes.tangent;
                 varyings.uv = _attributes.texCoord;
 
                 // static GI
-                #ifdef LIGHTMAP_ON
+                #if defined(LIGHTMAP_ON)
                     OUTPUT_LIGHTMAP_UV(_attributes.staticLightmapUV, unity_LightmapST, varyings.staticLightmapUV);
                 #endif
 
                 // dynamic GI
-                #ifdef DYNAMICLIGHTMAP_ON
+                #if defined(DYNAMICLIGHTMAP_ON)
                     OUTPUT_LIGHTMAP_UV(_attributes.dynamicLightmapUV, unity_DynamicLightmapST, varyings.dynamicLightmapUV);
                 #endif
 
@@ -294,11 +609,11 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             }
 
             /*********************************
-            *    Tesselation hull shader     *
+            *       Tesselation shader       *
             *********************************/
-            // The hull function is the first half of the tessellation shader.
-            // It operates on each patch (in our case, a patch is a triangle),
-            // and outputs new control points for the other tessellation stages.
+
+            // The hull function is the first half of the tessellation shader. It operates on each patch (in our 
+            // case, a patch is a triangle), and outputs new control points for the other tessellation stages.
             [domain("tri")]
             [outputcontrolpoints(3)]
             [outputtopology("triangle_cw")]
@@ -309,12 +624,8 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 return _patch[_id];
             }
 
-            /*********************************
-            *   Tesselation domain shader    *
-            *********************************/
-            // The domain function is the second half of the tessellation shader.
-            // It interpolates the properties of the vertices (position, normal, etc.)
-            // to create new vertices.
+            // The domain function is the second half of the tessellation shader. It interpolates 
+            // the properties of the vertices (position, normal, etc.) to create new vertices.
             [domain("tri")]
             VertexVaryings GBufferPassDomain(TessellationFactors _factors, OutputPatch<VertexAttributes, 3> _patch, float3 _barycentricCoordinates : SV_DomainLocation)
             {
@@ -342,69 +653,101 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float2 uv = _input[0].uv;
                 float grassVisibility = tex2Dlod(_GrassMap, float4(uv, 0, 0)).r;
 
-                if (grassVisibility >= _GrassThreshold)
+                // Early discards when the grass threshold is not reached.
+                if (grassVisibility < _GrassThreshold)
                 {
-                    float3 origin = _input[0].position.xyz;
-                    float3 normal = _input[0].normal;
-                    float4 tangent = _input[0].tangent;
-                    float3 bitangent = cross(normal, tangent.xyz) * tangent.w;
+                    return;
+                }
 
+                // local space vectors
+                float3 origin = _input[0].position.xyz;
+                float3 normal = _input[0].normal;
+                float4 tangent = _input[0].tangent;
+                float3 bitangent = cross(normal, tangent.xyz) * tangent.w;
+
+                #if defined(LIGHTMAP_ON)
+                    float2 staticLightmapUV = _input[0].staticLightmapUV;
+                #else
                     float2 staticLightmapUV = float2(0, 0);
-                    #if LIGHTMAP_ON
-                        staticLightmapUV = _input[0].staticLightmapUV;
-                    #endif
+                #endif
 
+                #if defined(DYNAMICLIGHTMAP_ON)
+                    float2 dynamicLightmapUV = _input[0].dynamicLightmapUV;
+                #else
                     float2 dynamicLightmapUV = float2(0, 0);
-                    #if DYNAMICLIGHTMAP_ON
-                        dynamicLightmapUV = _input[0].dynamicLightmapUV;
-                    #endif
+                #endif
 
-                    float3x3 tangentToLocal = float3x3
-                    (
-                        tangent.x, bitangent.x, normal.x,
-                        tangent.y, bitangent.y, normal.y,
-                        tangent.z, bitangent.z, normal.z
-                    );
+                float3x3 tangentToLocal = float3x3
+                (
+                    tangent.x, bitangent.x, normal.x,
+                    tangent.y, bitangent.y, normal.y,
+                    tangent.z, bitangent.z, normal.z
+                );
 
-                    // Rotate around the y-axis a random amount.
-                    float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
+                // Rotate the base around Z axis (local up) a random amount.
+                float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
-                    // Rotate around the bottom of the blade a random amount.
-                    float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+                // Rotate the tip around the base a random amount.
+                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
-                    float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
-                    float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
-                    windSample = 2 * windSample - 1;
-                    windSample *= length(_WindVelocity);
-                    float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+                // Apply wind displacement.
+                float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+                float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
+                windSample = 2 * windSample - 1;
+                windSample *= length(_WindVelocity);
+                float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+                float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
 
-                    // Rotate around wind matrix.
-                    float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+                // Transform the grass blades to the correct tangent space.
+                float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
+                float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
 
-                    // Transform the grass blades to the correct tangent space.
-                    float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
-                    float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
+                float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
+                float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
+                float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
+                float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
+                float exponent = _BladeBendCurve;
 
-                    float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
+                // Create blade segments by adding two vertices at once.
+                for (int i = 0; i < BLADE_SEGMENTS; ++i)
+                {
+                    float t = i / (float)BLADE_SEGMENTS;
+                    float3x3 transform = (i == 0) ? baseTransformationMatrix : tipTransformationMatrix;
 
-                    float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
-                    float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
-                    float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
+                    // - The blade curve lies in the YZ plane (tangent space)
+                    // - Its parametric equation is C(t) -> [y = forward * t^(exponent), z = height * t]
+                    // - The blade width is inversely proportional to its height
+                    float3 offset;
+                    offset.x = width * (1 - t);
+                    offset.y = pow(t, exponent) * forward;
+                    offset.z = height * t;
 
-                    // Create blade segments by adding two vertices at once.
-                    for (int i = 0; i < BLADE_SEGMENTS; ++i)
-                    {
-                        float t = i / (float)BLADE_SEGMENTS;
-                        float3 offset = float3(width * (1 - t), pow(t, _BladeBendCurve) * forward, height * t);
+                    // - The curve tangent is equal to the curbe derivative : [forward * exponent * t^(exponent - 1), height]
+                    // - The normal can then be obtained by rotating the tangent at 90° : (-tanZ, tanY)
+                    float3 normalT;
+                    normalT.x = 0.f;
+                    normalT.y = -height;
+                    normalT.z = forward * exponent * pow(t, max(0.01, exponent - 1));
+                    normalT = normalize(normalT);
 
-                        float3x3 transform = (i == 0) ? baseTransformationMatrix : tipTransformationMatrix;
+                    _triStream_.Append(TransformGeomToClip(origin, normalT, float3( offset.x, offset.y, offset.z), transform, float2(0, t), staticLightmapUV, dynamicLightmapUV));
+                    _triStream_.Append(TransformGeomToClip(origin, normalT, float3(-offset.x, offset.y, offset.z), transform, float2(1, t), staticLightmapUV, dynamicLightmapUV));
+                }
 
-                        _triStream_.Append(TransformGeomToClip(origin, normal, float3( offset.x, offset.y, offset.z), transform, float2(0, t), staticLightmapUV, dynamicLightmapUV));
-                        _triStream_.Append(TransformGeomToClip(origin, normal, float3(-offset.x, offset.y, offset.z), transform, float2(1, t), staticLightmapUV, dynamicLightmapUV));
-                    }
+                // Add the final vertex (t = 1) at the tip of the grass blade.
+                {
+                    float3 offset;
+                    offset.x = 0.f;
+                    offset.y = forward;
+                    offset.z = height;
 
-                    // Add the final vertex at the tip of the grass blade.
-                    _triStream_.Append(TransformGeomToClip(origin, normal, float3(0, forward, height), tipTransformationMatrix, float2(0.5, 1), staticLightmapUV, dynamicLightmapUV));
+                    float3 normalT;
+                    normalT.x = 0.f;
+                    normalT.y = -height;
+                    normalT.z = forward * exponent;
+                    normalT = normalize(normalT);
+
+                    _triStream_.Append(TransformGeomToClip(origin, normalT, offset, tipTransformationMatrix, float2(0.5, 1), staticLightmapUV, dynamicLightmapUV));
                     _triStream_.RestartStrip();
                 }
             }
@@ -412,15 +755,18 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             /*********************************
             *         Fragment shader        *
             *********************************/
-            FragmentOutput GBufferPassFragment(GeometryVaryings _varyings)
+            FragmentOutput GBufferPassFragment(GeometryVaryings _varyings, bool _facing : SV_IsFrontFace)
             {
+                UNITY_SETUP_INSTANCE_ID(_varyings);
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(_varyings);
+
                 // SURFACE DATA
                 SurfaceData surfaceData = (SurfaceData)0;
                 {
                     float4 color = tex2D(_BladeTexture, _varyings.uv);
                     color *= lerp(_BaseColor, _TipColor, _varyings.uv.y);
+                    surfaceData.albedo = color.rgb;
 
-                    surfaceData.albedo = color;
                     surfaceData.normalTS = float3(0.f, 0.f, 1.f);
                     surfaceData.smoothness = 0.f;
                     surfaceData.occlusion = 1.f;
@@ -436,22 +782,31 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 {
                     inputData.positionCS = _varyings.positionCS;
                     inputData.positionWS = _varyings.positionWS;
-                    inputData.normalWS = _varyings.normalWS;
+
+                    // Flip backfaces normals
+                    inputData.normalWS = _facing ? _varyings.normalWS : -_varyings.normalWS;
+
+                    // Derive view direction and screen UVs
                     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(_varyings.positionWS);
                     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(_varyings.positionCS);
 
+                    // Derive shadow map UVs
+                    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                        inputData.shadowCoord = _varyings.shadowCoord;
+                    #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                        inputData.shadowCoord = TransformWorldToShadowCoord(_varyings.positionWS);
+                    #else
+                        inputData.shadowCoord = float4(0, 0, 0, 0);
+                    #endif
+
+                    // static GI
                     #if defined(LIGHTMAP_ON)
                         inputData.shadowMask = SAMPLE_SHADOWMASK(_varyings.staticLightmapUV);
                     #else
                         inputData.shadowMask = float4(0, 0, 0, 0);
                     #endif
 
-                    #ifdef _MAIN_LIGHT_SHADOWS
-                        inputData.shadowCoord = TransformWorldToShadowCoord(_varyings.positionWS);
-                    #else
-                        inputData.shadowCoord = float4(0, 0, 0, 0);
-                    #endif
-
+                    // dynamic GI
                     #if defined(DYNAMICLIGHTMAP_ON)
                         inputData.bakedGI = SAMPLE_GI(_varyings.staticLightmapUV, _varyings.dynamicLightmapUV, _varyings.vertexSH, inputData.normalWS);
                     #else
@@ -482,11 +837,6 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
 
             ENDHLSL
         }
-
-        // SHADOW PASS : todo...
-        // Pass
-        // {
-        // }
 
     }
 
