@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 525719507}
-  m_IndirectSpecularColor: {r: 0.27101102, g: 0.4252505, b: 0.95503354, a: 1}
+  m_IndirectSpecularColor: {r: 0.2796155, g: 0.49600655, b: 0.98508275, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -951,17 +951,17 @@ PrefabInstance:
     - target: {fileID: 5651985950070776731, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.0873
+      value: 0.371
       objectReference: {fileID: 0}
     - target: {fileID: 5651985950070776731, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1332
+      value: 0.03
       objectReference: {fileID: 0}
     - target: {fileID: 5651985950070776731, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.0242
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 5731749790835841737, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4,
         type: 3}
@@ -3200,7 +3200,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7230533550593807359, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4, type: 3}
 --- !u!64 &1197303908
@@ -3266,7 +3266,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 1107447846450297504, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4, type: 3}
 --- !u!64 &1252726334
@@ -3439,7 +3439,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 817653574198740150, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4, type: 3}
 --- !u!1001 &1404963480
@@ -4223,7 +4223,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -3620511056445915257, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4, type: 3}
 --- !u!64 &1697940753
@@ -4390,7 +4390,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 7553809557243151310, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4, type: 3}
 --- !u!136 &1810595048
@@ -4764,7 +4764,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 6150201645971901280, guid: 9e5cda7c1cf3eae46ac7d48d12a657d4, type: 3}
 --- !u!64 &1915531708
