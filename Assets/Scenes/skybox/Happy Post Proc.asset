@@ -15,7 +15,7 @@ MonoBehaviour:
   active: 0
   intensity:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
 --- !u!114 &-6749773922699712965
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -28,7 +28,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c01700fd266d6914ababb731e09af2eb, type: 3}
   m_Name: DepthOfField
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   mode:
     m_OverrideState: 1
     m_Value: 2
@@ -46,7 +46,7 @@ MonoBehaviour:
     m_Value: 0
   focusDistance:
     m_OverrideState: 1
-    m_Value: 2.9
+    m_Value: 3.26
   aperture:
     m_OverrideState: 0
     m_Value: 5.6
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
   m_Name: Vignette
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   color:
     m_OverrideState: 1
     m_Value: {r: 0.02923639, g: 0.036518108, b: 0.084905684, a: 1}
@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb60a22f311433c4c962b888d1393f88, type: 3}
   m_Name: PaniniProjection
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   distance:
     m_OverrideState: 1
     m_Value: 0.439
@@ -161,7 +161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70afe9e12c7a7ed47911bb608a23a8ff, type: 3}
   m_Name: SplitToning
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   shadows:
     m_OverrideState: 0
     m_Value: {r: 0.5, g: 0.5, b: 0.5, a: 1}
@@ -183,7 +183,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 221518ef91623a7438a71fef23660601, type: 3}
   m_Name: WhiteBalance
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   temperature:
     m_OverrideState: 1
     m_Value: 11
@@ -213,6 +213,7 @@ MonoBehaviour:
   - {fileID: -8177811361616775426}
   - {fileID: -4489131873782015128}
   - {fileID: -2186155902543308926}
+  - {fileID: 8053304444560187009}
 --- !u!114 &402215088856884134
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -231,10 +232,10 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 1.1
+    m_Value: 1.01
   intensity:
     m_OverrideState: 1
-    m_Value: 0.6
+    m_Value: 1.08
   scatter:
     m_OverrideState: 0
     m_Value: 0.7
@@ -325,3 +326,37 @@ MonoBehaviour:
   maxNits:
     m_OverrideState: 0
     m_Value: 1000
+--- !u!114 &8053304444560187009
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a12b50457f2bfd14289683911cee9984, type: 3}
+  m_Name: VolumetricEffectComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.887
+  scattering:
+    m_OverrideState: 1
+    m_Value: 0.596
+  marchSteps:
+    m_OverrideState: 1
+    m_Value: 25
+  maxDistance:
+    m_OverrideState: 1
+    m_Value: 20
+  jitter:
+    m_OverrideState: 1
+    m_Value: 1000
+  gaussBlurAmount:
+    m_OverrideState: 1
+    m_Value: 2
+  gaussBlurSamples:
+    m_OverrideState: 1
+    m_Value: 10

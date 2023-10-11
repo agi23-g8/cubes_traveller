@@ -1,5 +1,23 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-3368978079335937308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2582c3b6dbe58b47b55b5ea412e0f53, type: 3}
+  m_Name: VolumetricLightFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  renderPassEvent: 550
+  volumetricLightShader: {fileID: 4800000, guid: 75a843987d391304bb642956cf38d835,
+    type: 3}
+  compositeShader: {fileID: -6465566751694194690, guid: cd66e7e04b69a724cb0266f99a4e77e3,
+    type: 3}
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,7 +157,8 @@ MonoBehaviour:
   - {fileID: -1878332245247344467}
   - {fileID: -637761443701277943}
   - {fileID: -10134551676668757}
-  m_RendererFeatureMap: adc0de57c6d2eee509bbbe90583726f7abb45acfadfedbff
+  - {fileID: -3368978079335937308}
+  m_RendererFeatureMap: adc0de57c6d2eee509bbbe90583726f7abb45acfadfedbffe48a1a5549fc3ed1
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
