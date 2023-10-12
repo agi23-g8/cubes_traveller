@@ -1,5 +1,4 @@
 using System;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 [ExecuteAlways]
@@ -36,28 +35,21 @@ public class SkyboxController : MonoBehaviour
     public Light moon;
     public float moonIntensityFactor = 1.5f;
 
+    private readonly float floatPrecision = 1000f;
+
     private void Update()
     {
-
-        skybox.SetColor("_SkyColor", skyColor.Evaluate(timeOfDay));
-        skybox.SetColor("_FogColor", fogColor.Evaluate(timeOfDay));
+        float roundedTime = Mathf.Round(timeOfDay * floatPrecision) / floatPrecision;
+        skybox.SetColor("_SkyColor", skyColor.Evaluate(roundedTime));
+        skybox.SetColor("_FogColor", fogColor.Evaluate(roundedTime));
         UpdateSun();
         UpdateMoon();
-
-        // set main light to the strongest light source
-        if (sun.intensity >= moon.intensity)
-        {
-            RenderSettings.sun = sun;
-        }
-        else
-        {
-            RenderSettings.sun = moon;
-        }
 
         if (!dayNightCycleEnabled || !Application.isPlaying)
         {
             return;
         }
+
         // timeScale = 60.0f means 1 minute per in-game day
         // timeScale = 1.0f means 1 second per in-game day
         timeOfDay += Time.deltaTime / timeScale;
@@ -72,9 +64,33 @@ public class SkyboxController : MonoBehaviour
     {
         float rotation = (timeOfDay - 0.5f) * 360.0f + 90.0f;
         sun.transform.rotation = Quaternion.Euler(rotation, sunPath, sunAngle);
-        sun.intensity = (Vector3.Dot(sun.transform.forward, Vector3.down) + 0.5f) * sunIntensityFactor;
-        sun.intensity = Mathf.Max(sun.intensity, 0.0f);
-        sun.colorTemperature = Mathf.Lerp(sunSetTemperature, sunNoonTemperature, sun.intensity);
+        
+        float angle = Vector3.Dot(sun.transform.forward, Vector3.down);
+
+        float threshold = 0.15f;
+        if (angle < threshold && angle > 0.0f)
+        {
+            float i = Mathf.Lerp(0.6f, sunIntensityFactor, angle / threshold);
+            sun.intensity = i;
+        }
+        else if (angle < 0.0f && angle > -threshold)
+        {
+            float i = Mathf.Lerp(0.6f, 0.0f, angle / -threshold);
+            sun.intensity = i;
+        }
+        else
+        {
+            if (angle < 0.0f)
+            {
+                sun.intensity = 0;
+            }
+            else
+            {
+                sun.intensity = sunIntensityFactor;
+            }   
+        }
+
+        sun.colorTemperature = Mathf.Lerp(sunSetTemperature, sunNoonTemperature, Mathf.Clamp01(angle));
     }
 
     private void UpdateMoon()
@@ -84,6 +100,4 @@ public class SkyboxController : MonoBehaviour
         moon.intensity = Vector3.Dot(moon.transform.forward, Vector3.down) * moonIntensityFactor;
         moon.intensity = Mathf.Max(moon.intensity, 0.0f);
     }
-
-
 }
