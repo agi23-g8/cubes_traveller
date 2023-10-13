@@ -37,6 +37,11 @@ public class SkyboxController : MonoBehaviour
 
     private readonly float floatPrecision = 1000f;
 
+    private void Start()
+    {
+        RenderSettings.sun = sun;
+    }
+
     private void Update()
     {
         float roundedTime = Mathf.Round(timeOfDay * floatPrecision) / floatPrecision;
