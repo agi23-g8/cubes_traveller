@@ -37,6 +37,36 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
 
         LOD 300
 
+        // COMMON
+        HLSLINCLUDE
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+
+            TEXTURE2D(_txSplatMap);
+
+            TEXTURE2D_ARRAY(_txAlbedoMaps);
+            SAMPLER(sampler_txAlbedoMaps);
+
+            TEXTURE2D_ARRAY(_txNormalMaps);
+            SAMPLER(sampler_txNormalMaps);
+
+            TEXTURE2D_ARRAY(_txRoughMaps);
+            SAMPLER(sampler_txRoughMaps);
+
+            TEXTURE2D_ARRAY(_txCavityMaps);
+            SAMPLER(sampler_txCavityMaps);
+
+            // -------------------------------------
+            // Material textures
+            CBUFFER_START(UnityPerMaterial)
+                half4 _txSplatMap_TexelSize;
+                int _sliceCount;
+                float _detailUvScale;
+            CBUFFER_END
+        ENDHLSL
+
         // SHADOW PASS
         Pass
         {
@@ -64,18 +94,16 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
 
             // -------------------------------------
             // Includes
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
-            // Shadow Casting Light geometric parameters.These variables are used when applying the shadow Normal Bias and are set by 
-            // UnityEngine.Rendering.Universal.ShadowUtils.SetupShadowCasterConstantBuffer in com.unity.render-pipelines.universal/Runtime/ShadowUtils.cs
+            // Shadow casting light geometric parameters. These variables are used when applying the shadow normal bias and are 
+            // set by ShadowUtils::SetupShadowCasterConstantBuffer in com.unity.render-pipelines.universal/Runtime/ShadowUtils.cs
             float3 _LightDirection;
             float3 _LightPosition;
 
-            /*********************************
-            *        Vertex attributes       *
-            *********************************/
+            // -------------------------------------
+            // Shader structures
+
             struct Attributes
             {
                 float3 position : POSITION;
@@ -83,9 +111,6 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-            /*********************************
-            *         Shader varyings        *
-            *********************************/
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
@@ -179,28 +204,30 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
 
             // -------------------------------------
             // Includes
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 
-            /*********************************
-            *        Vertex attributes       *
-            *********************************/
+            // -------------------------------------
+            // Shader structures
+
             struct Attributes
             {
                 float3 position : POSITION;
                 float3 normal : NORMAL;
                 float4 tangent : TANGENT;
                 float2 texCoord : TEXCOORD0;
-                float2 staticLightmapUV : TEXCOORD1;
-                float2 dynamicLightmapUV : TEXCOORD2;
+
+                #if defined(LIGHTMAP_ON)
+                    float2 staticLightmapUV : TEXCOORD1;
+                #endif
+
+                #if defined(DYNAMICLIGHTMAP_ON)
+                    float2 dynamicLightmapUV : TEXCOORD2;
+                #endif
+
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-            /*********************************
-            *         Shader varyings        *
-            *********************************/
             struct Varyings
             {
                 float2 baseUV : TEXCOORD0;
@@ -214,9 +241,13 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                     float4 shadowCoord : TEXCOORD6;
                 #endif
 
-                DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 7);
+                #if defined(LIGHTMAP_ON)
+                    float2 staticLightmapUV : TEXCOORD7;
+                #else
+                    half3 vertexSH : TEXCOORD7;
+                #endif
 
-                #ifdef DYNAMICLIGHTMAP_ON
+                #if defined(DYNAMICLIGHTMAP_ON)
                     float2 dynamicLightmapUV : TEXCOORD8;
                 #endif
 
@@ -225,32 +256,6 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            /*********************************
-            *         Shader resources       *
-            *********************************/
-            TEXTURE2D(_txSplatMap);
-
-            TEXTURE2D_ARRAY(_txAlbedoMaps);
-            SAMPLER(sampler_txAlbedoMaps);
-
-            TEXTURE2D_ARRAY(_txNormalMaps);
-            SAMPLER(sampler_txNormalMaps);
-
-            TEXTURE2D_ARRAY(_txRoughMaps);
-            SAMPLER(sampler_txRoughMaps);
-
-            TEXTURE2D_ARRAY(_txCavityMaps);
-            SAMPLER(sampler_txCavityMaps);
-
-            CBUFFER_START(cbMaterial)
-                half4 _txSplatMap_TexelSize;
-                int _sliceCount;
-                float _detailUvScale;
-            CBUFFER_END
-
-            /*********************************
-            *     Splat material helpers     *
-            *********************************/
             struct MaterialSample
             {
                 float3 albedo;
@@ -258,6 +263,9 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 float roughness;
                 float cavity;
             };
+
+            // -------------------------------------
+            // Helper functions
 
             /// fetches current material index from the splat map
             uint FetchMaterialIndex(in int2 _iuv)
@@ -401,8 +409,11 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
                 varyings.bitangentWS = normalInput.bitangentWS;
 
                 // static lighting
-                OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
-                OUTPUT_LIGHTMAP_UV(_attributes.staticLightmapUV, unity_LightmapST, varyings.staticLightmapUV);
+                #ifdef LIGHTMAP_ON
+                    OUTPUT_LIGHTMAP_UV(_attributes.staticLightmapUV, unity_LightmapST, varyings.staticLightmapUV);
+                #else
+                    OUTPUT_SH(varyings.normalWS, varyings.vertexSH);
+                #endif
 
                 // dynamic lighting
                 #ifdef DYNAMICLIGHTMAP_ON
