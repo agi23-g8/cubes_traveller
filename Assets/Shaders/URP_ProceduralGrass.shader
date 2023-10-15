@@ -2,29 +2,31 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
 {
     Properties
     {
+        [Header(# Grass color)][Space(10)]
         _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         _TipColor("Tip Color", Color) = (1, 1, 1, 1)
-        _BladeTexture("Blade Texture", 2D) = "white" {}
+        [NoScaleOffset]_BladeTexture("Blade Texture", 2D) = "white" {}
 
+        [Space(10)][Header(# Grass geometry)][Space(10)]
         _BladeWidthMin("Blade Width (Min)", Range(0, 0.1)) = 0.02
         _BladeWidthMax("Blade Width (Max)", Range(0, 0.1)) = 0.05
         _BladeHeightMin("Blade Height (Min)", Range(0, 2)) = 0.1
         _BladeHeightMax("Blade Height (Max)", Range(0, 2)) = 0.2
-
         _BladeSegments("Blade Segments", Range(1, 10)) = 3
         _BladeBendDistance("Blade Forward Amount", Range(-0.5, 0.5)) = 0.25
         _BladeBendCurve("Blade Curvature Amount", Range(1, 4)) = 2
+        _BladeBendVariation("Blade Bend Variation", Range(0, 1)) = 0.2
 
-        _BendDelta("Bend Variation", Range(0, 1)) = 0.2
-        _TessellationGrassDistance("Tessellation Grass Distance", Range(0.01, 0.5)) = 0.1
+        [Space(10)][Header(# Grass visibility)][Space(10)]
+        _GrassTessellationDistance("Grass Density", Range(0.005, 0.05)) = 0.02
+        _GrassThreshold("Visibility Threshold", Range(-0.1, 1)) = 0.5
+        _GrassFalloff("Visibility Fade-In Falloff", Range(0, 0.5)) = 0.05
+        [NoScaleOffset]_GrassMap("Visibility Map", 2D) = "white" {}
 
-        _GrassMap("Grass Visibility Map", 2D) = "white" {}
-        _GrassThreshold("Grass Visibility Threshold", Range(-0.1, 1)) = 0.5
-        _GrassFalloff("Grass Visibility Fade-In Falloff", Range(0, 0.5)) = 0.05
-
-        _WindMap("Wind Offset Map", 2D) = "bump" {}
+        [Space(10)][Header(# Wind displacement)][Space(10)]
         _WindVelocity("Wind Velocity", Vector) = (1, 0, 0, 0)
         _WindFrequency("Wind Pulse Frequency", Range(0, 1)) = 0.01
+        [NoScaleOffset]_WindMap("Wind Offset Map", 2D) = "bump" {}
 
         // unity lighting
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
@@ -73,15 +75,13 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float _BladeWidthMax;
                 float _BladeHeightMin;
                 float _BladeHeightMax;
-
                 float _BladeBendDistance;
                 float _BladeBendCurve;
+                float _BladeBendVariation;
 
-                float _BendDelta;
-                float _TessellationGrassDistance;
-                
-                float  _GrassThreshold;
-                float  _GrassFalloff;
+                float _GrassTessellationDistance;
+                float _GrassThreshold;
+                float _GrassFalloff;
 
                 float4 _WindMap_ST;
                 float4 _WindVelocity;
@@ -139,7 +139,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             // Deferred Rendering Path does not support the OpenGL-based graphics APIs
             #pragma exclude_renderers gles3 glcore
             
-            // Make sure geometry and tesselation shaders are supported.
+            // Make sure geometry and tessellation shaders are supported.
             #pragma require geometry
             #pragma require tessellation tessHW
 
@@ -204,7 +204,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 v0 = _vertexA.position.xyz;
                 float3 v1 = _vertexB.position.xyz;
                 float edgeLength = distance(v0, v1);
-                return edgeLength / _TessellationGrassDistance;
+                return edgeLength / _GrassTessellationDistance;
             }
 
             // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
@@ -265,7 +265,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             }
 
             /*********************************
-            *       Tesselation shader       *
+            *      Tessellation shader       *
             *********************************/
 
             // The hull function is the first half of the tessellation shader. It operates on each patch (in our 
@@ -332,15 +332,14 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
                 // Rotate around the bottom of the blade a random amount.
-                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BladeBendVariation * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
+                // Apply wind displacement.
                 float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
                 float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
                 windSample = 2 * windSample - 1;
                 windSample *= length(_WindVelocity);
                 float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
-
-                // Rotate around wind matrix.
                 float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
 
                 // Transform the grass blades to the correct tangent space.
@@ -348,7 +347,6 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
 
                 float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
-
                 float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
                 float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
                 float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
@@ -427,7 +425,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             // Deferred Rendering Path does not support the OpenGL-based graphics APIs
             #pragma exclude_renderers gles3 glcore
             
-            // Make sure geometry and tesselation shaders are supported.
+            // Make sure geometry and tessellation shaders are supported.
             #pragma require geometry
             #pragma require tessellation tessHW
 
@@ -529,7 +527,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 v0 = _vertexA.position.xyz;
                 float3 v1 = _vertexB.position.xyz;
                 float edgeLength = distance(v0, v1);
-                return edgeLength / _TessellationGrassDistance;
+                return edgeLength / _GrassTessellationDistance;
             }
 
             // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
@@ -609,7 +607,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             }
 
             /*********************************
-            *       Tesselation shader       *
+            *      Tessellation shader       *
             *********************************/
 
             // The hull function is the first half of the tessellation shader. It operates on each patch (in our 
@@ -688,7 +686,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
                 // Rotate the tip around the base a random amount.
-                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BladeBendVariation * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
                 // Apply wind displacement.
                 float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;

@@ -2,22 +2,22 @@ Shader "Universal Render Pipeline/Custom/SplatCube"
 {
     Properties
     {
-        // material textures
-        _txSplatMap ("SplatMap", 2D) = "black" {}
-        _txAlbedoMaps ("AlbedoMaps", 2DArray) = "" {}
-        _txNormalMaps ("NormalMaps", 2DArray) = "" {}
-        _txRoughMaps ("RoughMaps", 2DArray) = "" {}
-        _txCavityMaps ("CavityMaps", 2DArray) = "" {}
-
-        // material params
+        [Header(# Splat mapping)][Space(10)]
         _sliceCount ("Slice Count", Range(1,256)) = 256
-        _detailUvScale ("Detail UV Scale", Float) = 10.0
+        [NoScaleOffset]_txSplatMap ("SplatMap", 2D) = "black" {}
 
-        // material toogles
-        [Toggle(APPLY_ALBEDO)] _applyAlbedo ("Apply Albedo", Float) = 1
-        [Toggle(APPLY_NORMAL)] _applyNormal ("Apply Normals", Float) = 1
+        [Space(10)][Header(# PBR texture arrays)][Space(10)]
+        _detailUvScale ("Detail UV Scale", Float) = 10.0
+        [NoScaleOffset]_txAlbedoMaps ("AlbedoMaps", 2DArray) = "" {}
+        [NoScaleOffset]_txNormalMaps ("NormalMaps", 2DArray) = "" {}
+        [NoScaleOffset]_txRoughMaps  ("RoughMaps",  2DArray) = "" {}
+        [NoScaleOffset]_txCavityMaps ("CavityMaps", 2DArray) = "" {}
+
+        [Space(10)][Header(# Debug visualization)][Space(10)]
+        [Toggle(APPLY_ALBEDO)]    _applyAlbedo    ("Apply Albedo", Float)    = 1
+        [Toggle(APPLY_NORMAL)]    _applyNormal    ("Apply Normals", Float)   = 1
         [Toggle(APPLY_ROUGHNESS)] _applyRoughness ("Apply Roughness", Float) = 1
-        [Toggle(APPLY_CAVITY)] _applyCavity ("Apply Cavity", Float) = 1
+        [Toggle(APPLY_CAVITY)]    _applyCavity    ("Apply Cavity", Float)    = 1
 
         // unity lighting
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
