@@ -85,9 +85,9 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _BaseScale: 61.76
+    - _BaseScale: 60
     - _BaseSpeed: 0.015
-    - _BaseStrength: 9
+    - _BaseStrength: 10
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -105,11 +105,11 @@ Material:
     - _DrawOrder: 0
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _EmissionStrength: 1.3
+    - _EmissionStrength: 0.05
     - _EnvironmentReflections: 1
-    - _Fade_Depth: 12.17
-    - _FresnelOpacity: 0.21
-    - _FresnelPower: 11.66
+    - _Fade_Depth: 1
+    - _FresnelOpacity: 1
+    - _FresnelPower: 2
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
