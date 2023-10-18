@@ -28,6 +28,11 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
         _WindFrequency("Wind Pulse Frequency", Range(0, 1)) = 0.01
         [NoScaleOffset]_WindMap("Wind Offset Map", 2D) = "bump" {}
 
+        [Space(10)][Header(# Lighting)][Space(10)]
+        [Toggle(COMPUTE_LIGHTING)] _ComputeLighting("Compute Lighting", Float) = 0
+        _ShadowIntensity("Shadow Intensity", Range(0, 1)) = 1.0
+        _ShadowTessellation("Shadow Tessellation", Range(0, 1)) = 0.5
+
         // unity lighting
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
@@ -82,6 +87,9 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float _GrassTessellationDistance;
                 float _GrassThreshold;
                 float _GrassFalloff;
+
+                float _ShadowIntensity;
+                float _ShadowTessellation;
 
                 float4 _WindMap_ST;
                 float4 _WindVelocity;
@@ -156,6 +164,10 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             #pragma multi_compile_geometry _ _CASTING_PUNCTUAL_LIGHT_SHADOW
 
             // -------------------------------------
+            // Custom keywords
+            #pragma multi_compile_geometry _ COMPUTE_LIGHTING
+
+            // -------------------------------------
             // Includes
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
@@ -204,7 +216,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 v0 = _vertexA.position.xyz;
                 float3 v1 = _vertexB.position.xyz;
                 float edgeLength = distance(v0, v1);
-                return edgeLength / _GrassTessellationDistance;
+                return _ShadowTessellation * edgeLength / _GrassTessellationDistance;
             }
 
             // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
@@ -228,8 +240,12 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 localPosition = _origin + mul(_transform, _offset);
                 float3 positionWS = TransformObjectToWorld(localPosition);
 
+            #if defined(COMPUTE_LIGHTING)
                 float3 localNormal = normalize(mul(_transform, _normal));
                 float3 normalWS = TransformObjectToWorldNormal(localNormal);
+            #else
+                float3 normalWS = TransformObjectToWorldNormal(_normal);
+            #endif
 
                 #if _CASTING_PUNCTUAL_LIGHT_SHADOW
                     float3 lightDirectionWS = normalize(_LightPosition - positionWS);
@@ -347,7 +363,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
 
                 float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
-                float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
+                float width = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff) * _ShadowIntensity;
                 float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
                 float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
                 float exponent = _BladeBendCurve;
@@ -366,6 +382,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = pow(t, exponent) * forward;
                     offset.z = height * t;
 
+                #if defined(COMPUTE_LIGHTING)
                     // - The curve tangent is equal to the curbe derivative : [forward * exponent * t^(exponent - 1), height]
                     // - The normal can then be obtained by rotating the tangent at 90° : (-tanZ, tanY)
                     float3 normalT;
@@ -373,6 +390,9 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     normalT.y = -height;
                     normalT.z = forward * exponent * pow(t, max(0.01, exponent - 1));
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3( offset.x, offset.y, offset.z), transform));
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3(-offset.x, offset.y, offset.z), transform));
@@ -385,11 +405,15 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = forward;
                     offset.z = height;
 
+                #if defined(COMPUTE_LIGHTING)
                     float3 normalT;
                     normalT.x = 0.f;
                     normalT.y = -height;
                     normalT.z = forward * exponent;
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, offset, tipTransformationMatrix));
                     _triStream_.RestartStrip();
@@ -443,6 +467,11 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
             #pragma multi_compile _ SHADOWS_SHADOWMASK
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+
+            // -------------------------------------
+            // Custom keywords
+            #pragma multi_compile_geometry _ COMPUTE_LIGHTING
+            #pragma multi_compile_fragment _ COMPUTE_LIGHTING
 
             // -------------------------------------
             // Shader Stages
@@ -553,8 +582,12 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 varyings.positionWS = TransformObjectToWorld(localPosition);
                 varyings.positionCS = TransformObjectToHClip(localPosition);
 
+            #if defined(COMPUTE_LIGHTING)
                 float3 localNormal = normalize(mul(_transform, _normal));
                 varyings.normalWS = TransformObjectToWorldNormal(localNormal);
+            #else
+                varyings.normalWS = TransformObjectToWorldNormal(_normal);
+            #endif
 
                 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                     #if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
@@ -720,6 +753,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = pow(t, exponent) * forward;
                     offset.z = height * t;
 
+                #if defined(COMPUTE_LIGHTING)
                     // - The curve tangent is equal to the curbe derivative : [forward * exponent * t^(exponent - 1), height]
                     // - The normal can then be obtained by rotating the tangent at 90° : (-tanZ, tanY)
                     float3 normalT;
@@ -727,6 +761,9 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     normalT.y = -height;
                     normalT.z = forward * exponent * pow(t, max(0.01, exponent - 1));
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3( offset.x, offset.y, offset.z), transform, float2(0, t), staticLightmapUV, dynamicLightmapUV));
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3(-offset.x, offset.y, offset.z), transform, float2(1, t), staticLightmapUV, dynamicLightmapUV));
@@ -739,11 +776,15 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = forward;
                     offset.z = height;
 
+                #if defined(COMPUTE_LIGHTING)
                     float3 normalT;
                     normalT.x = 0.f;
                     normalT.y = -height;
                     normalT.z = forward * exponent;
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, offset, tipTransformationMatrix, float2(0.5, 1), staticLightmapUV, dynamicLightmapUV));
                     _triStream_.RestartStrip();
@@ -781,8 +822,12 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     inputData.positionCS = _varyings.positionCS;
                     inputData.positionWS = _varyings.positionWS;
 
+                #if defined(COMPUTE_LIGHTING)
                     // Flip backfaces normals
                     inputData.normalWS = _facing ? _varyings.normalWS : -_varyings.normalWS;
+                #else
+                    inputData.normalWS =  _varyings.normalWS;
+                #endif
 
                     // Derive view direction and screen UVs
                     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(_varyings.positionWS);
