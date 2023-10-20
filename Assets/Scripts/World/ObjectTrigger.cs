@@ -6,6 +6,8 @@ public class ObjectTrigger : MonoBehaviour
 
     public WorldAction actionOnTrigger;
 
+    public WorldAction ballRespawn;
+
     private void Start()
     {
         if (actionOnTrigger == null)
@@ -18,14 +20,18 @@ public class ObjectTrigger : MonoBehaviour
     {
         if (other.gameObject == objectOfInterest)
         {
-            Debug.Log("YOU WON!");
-
             if (actionOnTrigger == null)
             {
                 return;
             }
 
             actionOnTrigger.Execute();
+            Invoke("Respawn", 3.0f);
         }
+    }
+
+    private void Respawn()
+    {
+        ballRespawn.Execute();
     }
 }

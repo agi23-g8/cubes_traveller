@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2082489088679429615}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.389, y: 1, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
@@ -120,6 +120,7 @@ GameObject:
   - component: {fileID: 2538080936846611290}
   - component: {fileID: 2748734118347670333}
   - component: {fileID: 7626810884253194868}
+  - component: {fileID: 6769935557582715453}
   m_Layer: 0
   m_Name: goal-trigger
   m_TagString: Untagged
@@ -161,8 +162,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.51113486, y: 1.3261886, z: 2.3323789}
-  m_Center: {x: 0.3680718, y: 0.63050246, z: -0.047492582}
+  m_Size: {x: 0.18964171, y: 0.72899854, z: 2.3323789}
+  m_Center: {x: 0.8585389, y: 0.44079918, z: -0.047492582}
 --- !u!114 &7626810884253194868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,7 +177,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectOfInterest: {fileID: 0}
-  actionOnTrigger: {fileID: 0}
+  actionOnTrigger: {fileID: 6769935557582715453}
+  ballRespawn: {fileID: 0}
+--- !u!114 &6769935557582715453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7601116703995542922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84661f2ccfa80e446b0abfc55b4f00eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  goalUI: {fileID: 0}
+  goalAnim: {fileID: 0}
 --- !u!1001 &975306086169308488
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -189,6 +205,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: pumpkin
+      objectReference: {fileID: 0}
+    - target: {fileID: 145627730839579551, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 670630671203692837, guid: 622f28d06b28d784bb9674d654a9134c,
         type: 3}
@@ -255,6 +276,31 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3676126042554763352, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_Range
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3676126042554763352, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3736469893277793548, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7599059470449343153, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842258283182462212, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -278,6 +324,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: pumpkin (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 145627730839579551, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 670630671203692837, guid: 622f28d06b28d784bb9674d654a9134c,
         type: 3}
@@ -346,13 +397,33 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3676126042554763352, guid: 622f28d06b28d784bb9674d654a9134c,
         type: 3}
+      propertyPath: m_Range
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3676126042554763352, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
       propertyPath: m_Intensity
-      value: 0.93523204
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3736469893277793548, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7208577518947176222, guid: 622f28d06b28d784bb9674d654a9134c,
         type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7599059470449343153, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842258283182462212, guid: 622f28d06b28d784bb9674d654a9134c,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
