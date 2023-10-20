@@ -28,7 +28,7 @@ public class DayNightLight : MonoBehaviour
     bool IsNightTime()
     {
         float angle = Vector3.Dot(sun.transform.forward, Vector3.down);
-        if (angle < 0)
+        if (angle < 0.06)
         {
             return true;
         }
