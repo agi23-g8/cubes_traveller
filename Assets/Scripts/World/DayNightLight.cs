@@ -8,6 +8,12 @@ public class DayNightLight : MonoBehaviour
 
     void Start()
     {
+        // get the sun from scene
+        if (sun == null)
+        {
+            sun = GameObject.Find("Sun").GetComponent<Light>();
+        }
+
         lampLight = GetComponent<Light>();
     }
 
