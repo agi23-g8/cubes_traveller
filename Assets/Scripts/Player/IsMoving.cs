@@ -10,30 +10,32 @@ public class OpenClose : MonoBehaviour
     private Animator mAnimator;
     bool prevState = false;
 
+    public bool currentState = false;
+
     // Start is called before the first frame update
     void Start()
     {
         mAnimator = GetComponent<Animator>();
+        mAnimator.SetBool("IsWalking", false);
     }
 
     // Update is called once per frame
     void Update()
     {
-
         if (mAnimator != null)
         {
             float horizontalInput = Input.GetAxis("Horizontal");
             float verticalInput = Input.GetAxis("Vertical");
-            bool currentState = Mathf.Abs(horizontalInput) > 0.1 || Mathf.Abs(verticalInput) > 0.1;
+            currentState = Mathf.Abs(horizontalInput) > 0.01 || Mathf.Abs(verticalInput) > 0.01;
             if (currentState != prevState)
             {
                 if (currentState == true)
                 {
-                    mAnimator.SetTrigger("Walk");
+                    mAnimator.SetBool("IsWalking", true);
                 }
                 else
                 {
-                    mAnimator.SetTrigger("Idle");
+                    mAnimator.SetBool("IsWalking", false);
                 }
             }
             prevState = currentState;
