@@ -2,29 +2,40 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
 {
     Properties
     {
+        [Header(# Grass color)][Space(10)]
         _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         _TipColor("Tip Color", Color) = (1, 1, 1, 1)
-        _BladeTexture("Blade Texture", 2D) = "white" {}
+        [NoScaleOffset]_BladeTexture("Blade Texture", 2D) = "white" {}
 
+        [Space(10)][Header(# Grass geometry)][Space(10)]
         _BladeWidthMin("Blade Width (Min)", Range(0, 0.1)) = 0.02
         _BladeWidthMax("Blade Width (Max)", Range(0, 0.1)) = 0.05
         _BladeHeightMin("Blade Height (Min)", Range(0, 2)) = 0.1
         _BladeHeightMax("Blade Height (Max)", Range(0, 2)) = 0.2
-
         _BladeSegments("Blade Segments", Range(1, 10)) = 3
         _BladeBendDistance("Blade Forward Amount", Range(-0.5, 0.5)) = 0.25
         _BladeBendCurve("Blade Curvature Amount", Range(1, 4)) = 2
+        _BladeBendVariation("Blade Bend Variation", Range(0, 1)) = 0.2
 
-        _BendDelta("Bend Variation", Range(0, 1)) = 0.2
-        _TessellationGrassDistance("Tessellation Grass Distance", Range(0.01, 0.5)) = 0.1
+        [Space(10)][Header(# Grass visibility)][Space(10)]
+        _GrassTessellationDistance("Grass Density", Range(0.005, 0.05)) = 0.02
+        _GrassThreshold("Visibility Threshold", Range(-0.1, 1)) = 0.5
+        _GrassFalloff("Visibility Fade-In Falloff", Range(0, 0.5)) = 0.05
+        [NoScaleOffset]_GrassMap("Visibility Map", 2D) = "white" {}
 
-        _GrassMap("Grass Visibility Map", 2D) = "white" {}
-        _GrassThreshold("Grass Visibility Threshold", Range(-0.1, 1)) = 0.5
-        _GrassFalloff("Grass Visibility Fade-In Falloff", Range(0, 0.5)) = 0.05
-
-        _WindMap("Wind Offset Map", 2D) = "bump" {}
+        [Space(10)][Header(# Wind displacement)][Space(10)]
         _WindVelocity("Wind Velocity", Vector) = (1, 0, 0, 0)
         _WindFrequency("Wind Pulse Frequency", Range(0, 1)) = 0.01
+        [NoScaleOffset]_WindMap("Wind Offset Map", 2D) = "bump" {}
+
+        [Space(10)][Header(# Player displacement)][Space(10)]
+        _BendIntensity("Bend Intensity", Range(0, 10)) = 3.0
+        _BendInfluenceRadius("Bend Influence Radius", Range(0, 0.5)) = 0.15
+
+        [Space(10)][Header(# Lighting)][Space(10)]
+        [Toggle(COMPUTE_LIGHTING)] _ComputeLighting("Compute Lighting", Float) = 0
+        _ShadowIntensity("Shadow Intensity", Range(0, 1)) = 1.0
+        _ShadowTessellation("Shadow Tessellation", Range(0, 1)) = 0.5
 
         // unity lighting
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
@@ -58,6 +69,10 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             #define BLADE_SEGMENTS 4
 
             // -------------------------------------
+            // Global parameters
+            uniform float3 _PlayerPosition;
+
+            // -------------------------------------
             // Material textures
             sampler2D _BladeTexture;
             sampler2D _GrassMap;
@@ -73,19 +88,23 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float _BladeWidthMax;
                 float _BladeHeightMin;
                 float _BladeHeightMax;
-
                 float _BladeBendDistance;
                 float _BladeBendCurve;
+                float _BladeBendVariation;
 
-                float _BendDelta;
-                float _TessellationGrassDistance;
-                
-                float  _GrassThreshold;
-                float  _GrassFalloff;
+                float _GrassTessellationDistance;
+                float _GrassThreshold;
+                float _GrassFalloff;
+
+                float _ShadowIntensity;
+                float _ShadowTessellation;
 
                 float4 _WindMap_ST;
                 float4 _WindVelocity;
                 float  _WindFrequency;
+
+                float _BendIntensity;
+                float _BendInfluenceRadius;
             CBUFFER_END
 
             // -------------------------------------
@@ -139,7 +158,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             // Deferred Rendering Path does not support the OpenGL-based graphics APIs
             #pragma exclude_renderers gles3 glcore
             
-            // Make sure geometry and tesselation shaders are supported.
+            // Make sure geometry and tessellation shaders are supported.
             #pragma require geometry
             #pragma require tessellation tessHW
 
@@ -154,6 +173,10 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             // this is used during shadow map generation to differentiate between directional 
             // and punctual light shadows, as they use different formulas to apply Normal Bias
             #pragma multi_compile_geometry _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+
+            // -------------------------------------
+            // Custom keywords
+            #pragma multi_compile_geometry _ COMPUTE_LIGHTING
 
             // -------------------------------------
             // Includes
@@ -204,7 +227,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 v0 = _vertexA.position.xyz;
                 float3 v1 = _vertexB.position.xyz;
                 float edgeLength = distance(v0, v1);
-                return edgeLength / _TessellationGrassDistance;
+                return _ShadowTessellation * edgeLength / _GrassTessellationDistance;
             }
 
             // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
@@ -228,8 +251,12 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 localPosition = _origin + mul(_transform, _offset);
                 float3 positionWS = TransformObjectToWorld(localPosition);
 
+            #if defined(COMPUTE_LIGHTING)
                 float3 localNormal = normalize(mul(_transform, _normal));
                 float3 normalWS = TransformObjectToWorldNormal(localNormal);
+            #else
+                float3 normalWS = TransformObjectToWorldNormal(_normal);
+            #endif
 
                 #if _CASTING_PUNCTUAL_LIGHT_SHADOW
                     float3 lightDirectionWS = normalize(_LightPosition - positionWS);
@@ -265,7 +292,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             }
 
             /*********************************
-            *       Tesselation shader       *
+            *      Tessellation shader       *
             *********************************/
 
             // The hull function is the first half of the tessellation shader. It operates on each patch (in our 
@@ -332,24 +359,28 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
                 // Rotate around the bottom of the blade a random amount.
-                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BladeBendVariation * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
+                // Apply wind displacement.
                 float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
                 float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
                 windSample = 2 * windSample - 1;
                 windSample *= length(_WindVelocity);
                 float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
-
-                // Rotate around wind matrix.
                 float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+
+                // Apply player displacement.
+                float3 playerToBladeVector = origin - mul(unity_WorldToObject, _PlayerPosition);
+                float bendIntensity = _BendIntensity * smoothstep(_BendInfluenceRadius, 0.f, length(playerToBladeVector));
+                float3 bendAxis = normalize(float3(dot(playerToBladeVector, tangent), dot(playerToBladeVector, bitangent), 0));
+                float3x3 playerBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
 
                 // Transform the grass blades to the correct tangent space.
                 float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
-                float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
+                float3x3 tipTransformationMatrix = mul(mul(mul(mul(tangentToLocal, windMatrix), playerBendMatrix), randBendMatrix), randRotMatrix);
 
                 float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
-
-                float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
+                float width = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff) * _ShadowIntensity;
                 float height = lerp(_BladeHeightMin, _BladeHeightMax, GenerateRandom(origin.zyx) * falloff);
                 float forward = GenerateRandom(origin.yyz) * _BladeBendDistance;
                 float exponent = _BladeBendCurve;
@@ -368,6 +399,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = pow(t, exponent) * forward;
                     offset.z = height * t;
 
+                #if defined(COMPUTE_LIGHTING)
                     // - The curve tangent is equal to the curbe derivative : [forward * exponent * t^(exponent - 1), height]
                     // - The normal can then be obtained by rotating the tangent at 90° : (-tanZ, tanY)
                     float3 normalT;
@@ -375,6 +407,9 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     normalT.y = -height;
                     normalT.z = forward * exponent * pow(t, max(0.01, exponent - 1));
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3( offset.x, offset.y, offset.z), transform));
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3(-offset.x, offset.y, offset.z), transform));
@@ -387,11 +422,15 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = forward;
                     offset.z = height;
 
+                #if defined(COMPUTE_LIGHTING)
                     float3 normalT;
                     normalT.x = 0.f;
                     normalT.y = -height;
                     normalT.z = forward * exponent;
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, offset, tipTransformationMatrix));
                     _triStream_.RestartStrip();
@@ -427,7 +466,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             // Deferred Rendering Path does not support the OpenGL-based graphics APIs
             #pragma exclude_renderers gles3 glcore
             
-            // Make sure geometry and tesselation shaders are supported.
+            // Make sure geometry and tessellation shaders are supported.
             #pragma require geometry
             #pragma require tessellation tessHW
 
@@ -445,6 +484,11 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
             #pragma multi_compile _ SHADOWS_SHADOWMASK
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+
+            // -------------------------------------
+            // Custom keywords
+            #pragma multi_compile_geometry _ COMPUTE_LIGHTING
+            #pragma multi_compile_fragment _ COMPUTE_LIGHTING
 
             // -------------------------------------
             // Shader Stages
@@ -529,7 +573,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 v0 = _vertexA.position.xyz;
                 float3 v1 = _vertexB.position.xyz;
                 float edgeLength = distance(v0, v1);
-                return edgeLength / _TessellationGrassDistance;
+                return edgeLength / _GrassTessellationDistance;
             }
 
             // The patch constant function is where we create new control points on the patch. For the edges, increasing the tessellation
@@ -555,8 +599,12 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 varyings.positionWS = TransformObjectToWorld(localPosition);
                 varyings.positionCS = TransformObjectToHClip(localPosition);
 
+            #if defined(COMPUTE_LIGHTING)
                 float3 localNormal = normalize(mul(_transform, _normal));
                 varyings.normalWS = TransformObjectToWorldNormal(localNormal);
+            #else
+                varyings.normalWS = TransformObjectToWorldNormal(_normal);
+            #endif
 
                 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                     #if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
@@ -609,7 +657,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             }
 
             /*********************************
-            *       Tesselation shader       *
+            *      Tessellation shader       *
             *********************************/
 
             // The hull function is the first half of the tessellation shader. It operates on each patch (in our 
@@ -688,7 +736,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 randRotMatrix = BuildRotationMatrix(GenerateRandom(origin) * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
                 // Rotate the tip around the base a random amount.
-                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+                float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BladeBendVariation * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
                 // Apply wind displacement.
                 float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
@@ -698,9 +746,15 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
                 float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
 
+                // Apply player displacement.
+                float3 playerToBladeVector = origin - mul(unity_WorldToObject, _PlayerPosition);
+                float bendIntensity = _BendIntensity * smoothstep(_BendInfluenceRadius, 0.f, length(playerToBladeVector));
+                float3 bendAxis = normalize(float3(dot(playerToBladeVector, tangent), dot(playerToBladeVector, bitangent), 0));
+                float3x3 playerBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+
                 // Transform the grass blades to the correct tangent space.
                 float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
-                float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), randBendMatrix), randRotMatrix);
+                float3x3 tipTransformationMatrix = mul(mul(mul(mul(tangentToLocal, windMatrix), playerBendMatrix), randBendMatrix), randRotMatrix);
 
                 float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
                 float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
@@ -722,6 +776,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = pow(t, exponent) * forward;
                     offset.z = height * t;
 
+                #if defined(COMPUTE_LIGHTING)
                     // - The curve tangent is equal to the curbe derivative : [forward * exponent * t^(exponent - 1), height]
                     // - The normal can then be obtained by rotating the tangent at 90° : (-tanZ, tanY)
                     float3 normalT;
@@ -729,6 +784,9 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     normalT.y = -height;
                     normalT.z = forward * exponent * pow(t, max(0.01, exponent - 1));
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3( offset.x, offset.y, offset.z), transform, float2(0, t), staticLightmapUV, dynamicLightmapUV));
                     _triStream_.Append(TransformGeomToClip(origin, normalT, float3(-offset.x, offset.y, offset.z), transform, float2(1, t), staticLightmapUV, dynamicLightmapUV));
@@ -741,11 +799,15 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     offset.y = forward;
                     offset.z = height;
 
+                #if defined(COMPUTE_LIGHTING)
                     float3 normalT;
                     normalT.x = 0.f;
                     normalT.y = -height;
                     normalT.z = forward * exponent;
                     normalT = normalize(normalT);
+                #else
+                    float3 normalT = normal;
+                #endif
 
                     _triStream_.Append(TransformGeomToClip(origin, normalT, offset, tipTransformationMatrix, float2(0.5, 1), staticLightmapUV, dynamicLightmapUV));
                     _triStream_.RestartStrip();
@@ -783,8 +845,12 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                     inputData.positionCS = _varyings.positionCS;
                     inputData.positionWS = _varyings.positionWS;
 
+                #if defined(COMPUTE_LIGHTING)
                     // Flip backfaces normals
                     inputData.normalWS = _facing ? _varyings.normalWS : -_varyings.normalWS;
+                #else
+                    inputData.normalWS =  _varyings.normalWS;
+                #endif
 
                     // Derive view direction and screen UVs
                     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(_varyings.positionWS);

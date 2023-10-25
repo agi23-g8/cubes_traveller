@@ -160,7 +160,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skybox: {fileID: 2100000, guid: 8fbefb1293533e7449f9cb864533d841, type: 2}
   dayNightCycleEnabled: 1
-  timeOfDay: 0.685
+  timeOfDay: 0.547
   timeScale: 120
   skyColor:
     serializedVersion: 2
@@ -229,7 +229,7 @@ MonoBehaviour:
   sunAngle: -22.25
   sunPath: 32.33
   moon: {fileID: 5763858667568551155}
-  moonIntensityFactor: 1.5
+  moonIntensityFactor: 1
 --- !u!1 &3104094310305461451
 GameObject:
   m_ObjectHideFlags: 0
@@ -256,7 +256,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3104094310305461451}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.2027873, y: 0, z: 0, w: 0.97922283}
+  m_LocalRotation: {x: -0.5953838, y: 0, z: 0, w: 0.8034414}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -410,7 +410,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7625200317186948690}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.9119414, y: 0.23686713, z: -0.3050779, w: 0.13850775}
+  m_LocalRotation: {x: 0.72519267, y: 0.31153774, z: -0.32981586, w: 0.5179395}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -472,7 +472,7 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 3485.7388
+  m_ColorTemperature: 6283.5605
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
