@@ -16,8 +16,44 @@ MonoBehaviour:
   renderPassEvent: 550
   volumetricLightShader: {fileID: 4800000, guid: 75a843987d391304bb642956cf38d835,
     type: 3}
-  compositeShader: {fileID: -6465566751694194690, guid: cd66e7e04b69a724cb0266f99a4e77e3,
+--- !u!114 &-2504469433601980714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6346f57946a54c488ffe4c251e91fb1, type: 3}
+  m_Name: ScreenSpaceOutlines
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  renderPassEvent: 300
+  outlinesLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  seeThroughLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  viewSpaceNormalsShader: {fileID: -6465566751694194690, guid: 78799e383f33180409dc7f43939b8644,
     type: 3}
+  screenSpaceOutlineShader: {fileID: -6465566751694194690, guid: a6764cf19f7bf7a4a9b535d064a86f21,
+    type: 3}
+  transparentsShader: {fileID: 10755, guid: 0000000000000000f000000000000000, type: 0}
+  viewSpaceNormalsTextureSettings:
+    colorFormat: 0
+    depthBufferBits: 0
+    filterMode: 0
+    backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+  screenSpaceOutlineSettings:
+    outlineColor: {r: 1, g: 0.8454399, b: 0, a: 1}
+    outlineScale: 2.5
+    depthThreshold: 3
+    robertsCrossMultiplier: 89
+    normalThreshold: 0.197
+    steepAngleThreshold: 0
+    steepAngleMultiplier: 102
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: PlayerHidden
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: PlayerHidden
     Event: 300
@@ -107,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: PlayerVisible
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: PlayerVisible
     Event: 300
@@ -158,7 +194,8 @@ MonoBehaviour:
   - {fileID: -637761443701277943}
   - {fileID: -10134551676668757}
   - {fileID: -3368978079335937308}
-  m_RendererFeatureMap: adc0de57c6d2eee509bbbe90583726f7abb45acfadfedbffe48a1a5549fc3ed1
+  - {fileID: -2504469433601980714}
+  m_RendererFeatureMap: adc0de57c6d2eee509bbbe90583726f7abb45acfadfedbffe48a1a5549fc3ed1d68654c351563edd
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
