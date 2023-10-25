@@ -78,25 +78,17 @@ public class PlayerController : MonoBehaviour
 
         // transform it from camera space to world space
         // this makes movement relative to the camera, which is more intuitive
-        // applied only if a direction is given ; otherwise the character take the last direction
-        if (input != Vector3.zero)
-        {
-            moveDir = Camera.main.transform.TransformDirection(input).normalized;
+        Vector3 moveDir = Camera.main.transform.TransformDirection(input).normalized;
 
-            // project the move vector onto the plane of the face
-            moveDir = Vector3.ProjectOnPlane(moveDir, currentNormal).normalized;
-        }
+        // project the move vector onto the plane of the face
+        moveDir = Vector3.ProjectOnPlane(moveDir, currentNormal).normalized;
 
         Vector3 newPos = currentPosition + inputSpeed * playerSpeed * Time.fixedDeltaTime * moveDir;
         rb.MovePosition(newPos);
 
         // rotate the player to align with the face normal
         // TODO: rework this after demo
-        // Quaternion targetRotation = Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation;
-
-        // Work best with it, by enabling directional rotation based on the direction
-        Quaternion targetRotation = Quaternion.LookRotation(moveDir, currentNormal);
-
+        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation;
         rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, 0.4f));
 
         // apply gravity
