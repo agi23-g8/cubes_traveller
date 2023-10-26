@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
 
     // Position relative to the rotation of the cube
     public Vector3 cubeRelativePosition;
+    // Model direction 
+    private Vector3 moveDir;
 
     private void Start()
     {
@@ -73,10 +75,9 @@ public class PlayerController : MonoBehaviour
         Vector3 input = new Vector3(horizontalInput, verticalInput * faceCameraAlignment, verticalInput * forwardBackwardScale);
         float inputSpeed = Mathf.Min(input.magnitude, 1.0f);
 
-
         // transform it from camera space to world space
         // this makes movement relative to the camera, which is more intuitive
-        Vector3 moveDir = Camera.main.transform.TransformDirection(input).normalized;
+        moveDir = Camera.main.transform.TransformDirection(input).normalized;
 
         // project the move vector onto the plane of the face
         moveDir = Vector3.ProjectOnPlane(moveDir, currentNormal).normalized;
@@ -91,7 +92,6 @@ public class PlayerController : MonoBehaviour
 
         // apply gravity
         rb.AddForce(Physics.gravity.magnitude * -currentNormal);
-
 
         // TODO: rework this after demo
         // check if the player is grounded
