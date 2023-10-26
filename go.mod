@@ -1,6 +1,6 @@
 module github.com/davidasberg/cubes_traveller
 
-go 1.21.3
+go 1.23.0
 
 require (
 	github.com/hugomods/images v0.8.0 // indirect
