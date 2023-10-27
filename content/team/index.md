@@ -58,12 +58,24 @@ title: "Team"
     <p style="text-align:justify">
       I have worked on many areas of the project, but my main focus has been on the graphics and interaction. I have worked on the lighting, post-processing, and shaders. I have also worked on the interaction for each of the different controllers, and the networking to allow any mobile device to be used as a controller. I have also worked on the game design, and the overall structure of the project.
     </p>
-  </div>
+</div>
 </div>
 
 <div style="display:flex;gap:10px;flex-direction:row;align-items:center;">
 <p style="width:10rem">{{% paige/image alt="Landscape" breakpoints=true class="object-fit-cover rounded-4" fetchpriority="high" height="15rem" loading="eager" src="anders.png" width="100%" %}}</p>
-<p class="display-7 fw-bold h3">Anders Blomqvist</p>
+<div style="display:flex;gap:10px;flex-direction:column;width:40rem">
+    <span>
+    <nobr class="display-7 fw-bold h3">Anders Blomqvist</nobr>
+    </span>
+    <span> 
+      <p class="tag">Graphics</p>
+      <p class="tag">Blender</p>
+      <p class="tag">Github</p>
+    </span>
+    <p style="text-align:justify">
+      I contributed to various aspects of the project, but my primary focus was on graphics and 3D modeling. In the project's early stages, I established a GitHub workflow and created the initial gameplay iteration. I also developed the sky shader, including the day and night cycle, and created most of our 3D models. Additionally, I have made sure that our game looks good from a visual standpoint where I provided feedback to colleagues and parameter tuning.
+    </p>
+</div>
 </div>
 
 <div style="display:flex;gap:10px;flex-direction:row;align-items:center;">
