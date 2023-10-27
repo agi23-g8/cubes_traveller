@@ -21,8 +21,18 @@ public class SimpleInteraction : MonoBehaviour, IInteractable
 
     public bool OnInteract(Interactor interactor)
     {
-        Debug.Log(interactionText);
         ActionOnPressed.Execute();
+
+        // check if ActionOnPressed uses IExecuteArgument interface
+        if (ActionOnPressed is IExecuteArgument)
+        {
+            // cast to IExecuteArgument
+            IExecuteArgument executeArgument = (IExecuteArgument)ActionOnPressed;
+
+            // call Execute with the interactor's position
+            executeArgument.Execute(interactor.transform.position);
+        }
+
         return true;
     }
 

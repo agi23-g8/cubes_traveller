@@ -1,5 +1,74 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4342467510260307530
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2846872395481722478}
+  - component: {fileID: 2105345882850421447}
+  - component: {fileID: 3742189957104585533}
+  m_Layer: 3
+  m_Name: ball kicker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2846872395481722478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4342467510260307530}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2930444280021222891}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &2105345882850421447
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4342467510260307530}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.75
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3742189957104585533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4342467510260307530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d76569f4fa3d1344a4cbeb23927b117, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactionText: ball was kicked
+  tooltip: {fileID: 0}
+  ActionOnPressed: {fileID: 3458679076982009954}
 --- !u!1 &4468675124703909080
 GameObject:
   m_ObjectHideFlags: 0
@@ -15,6 +84,7 @@ GameObject:
   - component: {fileID: 730538486430607916}
   - component: {fileID: 2288271513271213628}
   - component: {fileID: 6609146730636940670}
+  - component: {fileID: 3458679076982009954}
   m_Layer: 6
   m_Name: Ball movable
   m_TagString: Untagged
@@ -34,7 +104,8 @@ Transform:
   m_LocalPosition: {x: -0.284, y: 1.15, z: 0.803}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.29999998}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2846872395481722478}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5295632283365867362
@@ -94,7 +165,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4468675124703909080}
-  m_Material: {fileID: 13400000, guid: 4b2ca8be66caa8f4f9f63cdec80ea739, type: 2}
+  m_Material: {fileID: 13400000, guid: c42826295e9bb6843ac1f24b96a1c878, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -117,8 +188,8 @@ Rigidbody:
   m_GameObject: {fileID: 4468675124703909080}
   serializedVersion: 4
   m_Mass: 10
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 1.6
+  m_AngularDrag: 1.6
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -160,8 +231,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7795082f6d38b34e9cf6f717973b3c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravityMultplier: 35
+  gravityMultplier: 10
   cubeTransform: {fileID: 0}
   layerMask:
     serializedVersion: 2
     m_Bits: 128
+--- !u!114 &3458679076982009954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4468675124703909080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cff06bbcec10440469caa4db02712686, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  forceMagnitude: 40
+  yStrength: 5
