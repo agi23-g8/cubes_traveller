@@ -104,7 +104,7 @@ title: "Team"
     <span>
     <nobr class="display-7 fw-bold h3">Jérémy Carneau</nobr>
     <a href="https://github.com/Jeremy-Carneau" class="social-link">Github</a>
-    <a href="www.linkedin.com/in/jeremy-carneau" class="social-link">LinkedIn</a>
+    <a href="https://linkedin.com/in/jeremy-carneau" class="social-link">LinkedIn</a>
     </span>
     <span> 
       <p class="tag">Interaction</p>
