@@ -16,16 +16,28 @@ url = "/"
 weight = 10
 
 [[languages.en.menu.main]]
+identifier = "development"
+name = "Development"
+url = "/development/"
+weight = 20
+
+[[languages.en.menu.main]]
 identifier = "team"
 name = "Team"
 url = "/team/"
-weight = 20
+weight = 30
+
+[[languages.en.menu.main]]
+identifier = "relatedwork"
+name = "Related Work"
+url = "/relatedwork/"
+weight = 40
 
 [[languages.en.menu.main]]
 identifier = "gallery"
 name = "Gallery"
 url = "/gallery/"
-weight = 30
+weight = 50
 
 
 # [[languages.en.menu.main]]
@@ -85,8 +97,8 @@ weight = 30
 [markup.goldmark.renderer]
 unsafe = true
 
-[markup.highlight]
-noclasses = false
+# [markup.highlight]
+# noclasses = false
 
 [markup.tableofcontents]
 endlevel = 6
@@ -96,10 +108,6 @@ startlevel = 2
 [[module.imports]]
 path = "github.com/willfaught/paige"
 
-[[module.imports]]
-path = 'github.com/hugomods/images'
-disable = false
-
 [outputs]
 home = ["atom", "html", "json", "rss"]
 section = ["atom", "html", "rss"]
@@ -107,10 +115,10 @@ taxonomy = ["atom", "html", "rss"]
 term = ["atom", "html", "rss"]
 
 
-[params.paige.file_link]
-content = "Edit this page"
-disable = true
-url = "https://github.com/willfaught/paige/edit/master/exampleSite/content/%s"
+# [params.paige.file_link]
+# content = "Edit this page"
+# disable = true
+# url = "https://github.com/willfaught/paige/edit/master/exampleSite/content/%s"
 
 [taxonomies]
 author = "authors"
