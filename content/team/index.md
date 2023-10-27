@@ -99,8 +99,22 @@ title: "Team"
 </div>
 
 <div style="display:flex;gap:10px;flex-direction:row;align-items:center;">
-<p style="width:10rem">{{% paige/image alt="Landscape" breakpoints=true class="object-fit-cover rounded-4" fetchpriority="high" height="15rem" loading="eager" src="jeremy.png" width="100%" %}}</p>
-<p class="display-7 fw-bold h3">Jeremy Carneau</p>
+<p style="width:10rem">{{% paige/image alt="Landscape" breakpoints=true class="object-fit-cover rounded-4" fetchpriority="high" height="15rem" loading="eager" src="jeremy.jpg" width="100%" %}}</p>
+<div style="display:flex;gap:10px;flex-direction:column;width:40rem">
+    <span>
+    <nobr class="display-7 fw-bold h3">Jérémy Carneau</nobr>
+    <a href="https://github.com/Jeremy-Carneau" class="social-link">Github</a>
+    <a href="www.linkedin.com/in/jeremy-carneau" class="social-link">LinkedIn</a>
+    </span>
+    <span> 
+      <p class="tag">Interaction</p>
+      <p class="tag">Game design</p>
+      <p class="tag">Organisation</p>
+    </span>
+    <p style="text-align:justify">
+      I contributed modestly to several aspects of the project. My main role was to manage the agile methods used to organize tasks throughout the project. I also contributed to the development of the game's interaction system. In addition, I took part in the creation of puzzles in the game, which should have taken place in another level of the game.
+    </p>
+</div>
 </div>
 
 </div>
