@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class Button : MonoBehaviour, IInteractable
+public class SimpleInteraction : MonoBehaviour, IInteractable
 {
     [SerializeField]
     private string interactionText;
