@@ -6,4 +6,4 @@ tags:
 title: "Gallery"
 ---
 
-{{< paige/gallery images="*" maxheight="20rem" type="rows" />}}
+{{< paige/gallery images="*" class="object-fit-cover rounded-4" maxheight="20rem" type="rows" />}}
