@@ -15,15 +15,28 @@ title: "Team"
     padding: 5px 8px;
     background-color: #0d6efd; /* Choose your preferred color */
     color: white; /* Choose your preferred text color */
-    border-radius: 50px; /* Adjust this to your preferred pill shape */
+    border-radius: 15px; /* Adjust this to your preferred pill shape */
     text-align: center;
     text-decoration: none;
     font-size: 16px; /* Adjust this to your preferred font size */
     margin: 2px;
     cursor: pointer;
-  } 
-  .tag:hover {
-    background-color: #0d6efd; /* Choose your preferred hover color */
+  }
+
+  .social-link {
+    display: inline-block;
+    padding: 3px 6px;
+    background-color: #007808; /* Choose your preferred color */
+    color: white; /* Choose your preferred text color */
+    border-radius: 5px; /* Adjust this to your preferred pill shape */
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px; /* Adjust this to your preferred font size */
+    margin: 2px;
+    cursor: pointer;
+  }
+  .social-link:hover {
+    background-color: #27f534; /* Choose your preferred hover color */
   }
 </style>
 
@@ -32,7 +45,11 @@ title: "Team"
 <div style="display:flex;gap:10px;flex-direction:row;align-items:center;">
 <p style="width:10rem">{{% paige/image alt="Landscape" breakpoints=true class="object-fit-cover rounded-4" fetchpriority="high" height="15rem" loading="eager" src="david.png" width="100%" %}}</p>
 <div style="display:flex;gap:10px;flex-direction:column;width:40rem">
-    <p class="display-7 fw-bold h3">David Åsberg</p>
+    <span>
+    <nobr class="display-7 fw-bold h3">David Åsberg</nobr>
+    <a href="https://github.com/davidasberg" class="social-link">Github</a>
+    <a href="https://www.linkedin.com/in/david-aasberg/" class="social-link">LinkedIn</a>
+    </span>
     <span> 
       <p class="tag">Graphics</p>
       <p class="tag">Interaction</p>
