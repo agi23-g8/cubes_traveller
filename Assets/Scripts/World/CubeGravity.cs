@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -12,7 +13,9 @@ public class CubeGravity : MonoBehaviour
     public LayerMask layerMask;
 
     private Rigidbody rb;
-    
+
+    private Vector3 currentNormal;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -24,7 +27,7 @@ public class CubeGravity : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         ApplyCubeGravity();
     }
@@ -32,20 +35,26 @@ public class CubeGravity : MonoBehaviour
     private void ApplyCubeGravity()
     {
         Vector3 rayDir = cubeTransform.position - transform.position;
-        Vector3 currentNormal = transform.up;
+        Vector3 normal = transform.up;
 
         Debug.DrawRay(transform.position, rayDir, Color.blue);
 
         RaycastHit hit;
         if (Physics.Raycast(transform.position, rayDir, out hit, Mathf.Infinity, layerMask))
         {
-            currentNormal = hit.normal;
-            Debug.DrawRay(hit.point, currentNormal, Color.green);
+            normal = hit.normal;
+            Debug.DrawRay(hit.point, normal, Color.green);
         }
 
-        currentNormal *= -1;
+        normal *= -1;
+        currentNormal = normal;
         rb.AddForce(currentNormal * gravityMultplier, ForceMode.Force);
 
         Debug.DrawRay(transform.position, currentNormal, Color.red);
+    }
+
+    public Vector3 GetCurrentNormal()
+    {
+        return currentNormal;
     }
 }
