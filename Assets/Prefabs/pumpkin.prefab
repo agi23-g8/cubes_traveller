@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8204039983300819607}
   - component: {fileID: 6617402588131524128}
   m_Layer: 0
-  m_Name: Pumpkin
+  m_Name: pumpkin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -159,7 +159,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
