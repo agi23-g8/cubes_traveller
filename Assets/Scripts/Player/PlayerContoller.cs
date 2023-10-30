@@ -13,6 +13,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     Transform cubeTransform; // Assign this in the inspector
 
+    [SerializeField]
+    Animator animator;
+
     private Rigidbody rb;
     private float horizontalInput;
     private float verticalInput;
@@ -85,9 +88,21 @@ public class PlayerController : MonoBehaviour
         Vector3 newPos = currentPosition + inputSpeed * playerSpeed * Time.fixedDeltaTime * moveDir;
         rb.MovePosition(newPos);
 
+        // if the player isn't moving, use the last move direction
+        // and set the walking animation to false
+        if (moveDir.magnitude < 0.01f)
+        {
+            moveDir = transform.forward;
+            animator.SetBool("IsWalking", false);
+        }
+        else
+        {
+            animator.SetBool("IsWalking", true);
+        }
+
         // rotate the player to align with the face normal
         // TODO: rework this after demo
-        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, currentNormal) * transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(moveDir, currentNormal);
         rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, 0.4f));
 
         // apply gravity
