@@ -21,7 +21,6 @@ public class Interactor : MonoBehaviour
             return;
         }
 
-        // TODO: Other input methods
         if (Input.GetButtonDown("Interact"))
         {
             bool result = interactWith.OnInteract(this);
