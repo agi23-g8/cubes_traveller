@@ -14,6 +14,9 @@ public class PlayerController : MonoBehaviour
     Transform cubeTransform; // Assign this in the inspector
 
     [SerializeField]
+    LayerMask cubeLayerMask;
+
+    [SerializeField]
     Animator animator;
 
     private Rigidbody rb;
@@ -26,6 +29,8 @@ public class PlayerController : MonoBehaviour
 
     // Position relative to the rotation of the cube
     public Vector3 cubeRelativePosition;
+    public Vector3 cubeRelativeRotation;
+
     // Model direction 
     private Vector3 moveDir;
 
@@ -52,16 +57,24 @@ public class PlayerController : MonoBehaviour
         // current position relative to the cube
         Vector3 currentPosition = cubeTransform.TransformPoint(cubeRelativePosition);
 
-
         // raycast from the player to the cube origin
         // the face it hits is the face that is facing the player
         RaycastHit hit;
         Vector3 rayDir = cubeTransform.position - currentPosition;
         Vector3 currentNormal = transform.up;
-        if (Physics.Raycast(currentPosition, rayDir, out hit))
+        if (Physics.Raycast(currentPosition + transform.up * 0.1f, rayDir, out hit, Mathf.Infinity, cubeLayerMask))
         {
             currentNormal = hit.normal;
+            Debug.DrawRay(currentPosition, currentNormal, Color.blue);
         }
+        else
+        {
+            Debug.DrawRay(currentPosition, rayDir, Color.green);
+            Debug.Log("No hit");
+            Debug.Break();
+        }
+
+        Quaternion currentRotation = Quaternion.LookRotation(cubeTransform.TransformDirection(cubeRelativeRotation), currentNormal);
 
         // if the face is facing the camera, vertical input is up/down
         // if they are orthogonal, vertical input is forward/backward
@@ -88,22 +101,23 @@ public class PlayerController : MonoBehaviour
         Vector3 newPos = currentPosition + inputSpeed * playerSpeed * Time.fixedDeltaTime * moveDir;
         rb.MovePosition(newPos);
 
-        // if the player isn't moving, use the last move direction
+        // if the player isn't moving, don't rotate them
         // and set the walking animation to false
+        Quaternion targetRotation;
         if (moveDir.magnitude < 0.01f)
         {
-            moveDir = transform.forward;
+            targetRotation = Quaternion.FromToRotation(transform.up, currentNormal) * currentRotation;
             animator.SetBool("IsWalking", false);
         }
         else
         {
+            targetRotation = Quaternion.LookRotation(moveDir, currentNormal);
             animator.SetBool("IsWalking", true);
         }
 
         // rotate the player to align with the face normal
         // TODO: rework this after demo
-        Quaternion targetRotation = Quaternion.LookRotation(moveDir, currentNormal);
-        rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, 0.4f));
+        rb.MoveRotation(Quaternion.Slerp(currentRotation, targetRotation, 0.4f));
 
         // apply gravity
         rb.AddForce(Physics.gravity.magnitude * -currentNormal);
@@ -111,7 +125,7 @@ public class PlayerController : MonoBehaviour
         // TODO: rework this after demo
         // check if the player is grounded
         isGrounded = false;
-        if (Physics.Raycast(currentPosition, -currentNormal, out hit))
+        if (Physics.Raycast(currentPosition + transform.up * 0.05f, -currentNormal, out hit))
         {
             if (hit.distance < 0.1f)
             {
