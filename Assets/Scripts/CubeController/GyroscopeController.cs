@@ -73,6 +73,7 @@ public class GyroscopeController : MonoBehaviour
     {
         Quaternion newCubeRotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
         playerController.cubeRelativePosition = transform.InverseTransformPoint(playerController.transform.position);
+        playerController.cubeRelativeRotation = transform.InverseTransformDirection(playerController.transform.forward);
         transform.rotation = newCubeRotation;
     }
 
