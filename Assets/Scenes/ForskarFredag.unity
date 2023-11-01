@@ -5116,7 +5116,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5518577789578991427, guid: f50099de01c537f479d7854a6fdb43f4,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1035782479}
+      addedObject: {fileID: 1035782477}
   m_SourcePrefab: {fileID: 100100000, guid: f50099de01c537f479d7854a6fdb43f4, type: 3}
 --- !u!64 &564612284
 MeshCollider:
@@ -5623,22 +5623,22 @@ PrefabInstance:
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.46174863
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.8870109
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
@@ -5648,7 +5648,7 @@ PrefabInstance:
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -125
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
@@ -6057,8 +6057,8 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 552318796}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &1035782479
-MeshCollider:
+--- !u!136 &1035782477
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -6075,10 +6075,11 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -2587485212497171513, guid: f50099de01c537f479d7854a6fdb43f4, type: 3}
+  serializedVersion: 2
+  m_Radius: 1.9421618
+  m_Height: 8.692278
+  m_Direction: 2
+  m_Center: {x: 0.014168636, y: 0.01256514, z: -0.502878}
 --- !u!136 &1115754688
 CapsuleCollider:
   m_ObjectHideFlags: 0
