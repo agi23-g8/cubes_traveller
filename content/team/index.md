@@ -66,6 +66,8 @@ title: "Team"
 <div style="display:flex;gap:10px;flex-direction:column;width:40rem">
     <span>
     <nobr class="display-7 fw-bold h3">Anders Blomqvist</nobr>
+    <a href="https://github.com/andersblomqvist" class="social-link">Github</a>
+    <a href="https://www.linkedin.com/in/anders-blomqvist-9b7958143/" class="social-link">LinkedIn</a>
     </span>
     <span> 
       <p class="tag">Graphics</p>
