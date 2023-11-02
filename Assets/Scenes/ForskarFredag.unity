@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1316154516}
-  m_IndirectSpecularColor: {r: 0.2433762, g: 0.41372168, b: 0.96331847, a: 1}
+  m_IndirectSpecularColor: {r: 0.24337628, g: 0.41372168, b: 0.96331847, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4581,6 +4581,16 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7709759469908239225, guid: bac1ba6dbb725dc418ea62dbc104cda6,
+        type: 3}
+      propertyPath: minZoom
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709759469908239225, guid: bac1ba6dbb725dc418ea62dbc104cda6,
+        type: 3}
+      propertyPath: zoomSpeed
+      value: 1.3
+      objectReference: {fileID: 0}
     - target: {fileID: 8288076945483008678, guid: bac1ba6dbb725dc418ea62dbc104cda6,
         type: 3}
       propertyPath: GlobalObjectIdHash
@@ -5509,6 +5519,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 259880396873062249, guid: 77a7f27b58093f744a46d44c4ef7538b,
+        type: 3}
+      propertyPath: m_Height
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 259880396873062249, guid: 77a7f27b58093f744a46d44c4ef7538b,
+        type: 3}
+      propertyPath: m_Radius
+      value: 0.92432356
+      objectReference: {fileID: 0}
+    - target: {fileID: 259880396873062249, guid: 77a7f27b58093f744a46d44c4ef7538b,
+        type: 3}
+      propertyPath: m_Center.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 259880396873062249, guid: 77a7f27b58093f744a46d44c4ef7538b,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 2.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 259880396873062249, guid: 77a7f27b58093f744a46d44c4ef7538b,
+        type: 3}
+      propertyPath: m_Center.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2077626104476799563, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -5623,7 +5658,7 @@ PrefabInstance:
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.46174863
+      value: 0.80982965
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
@@ -5633,7 +5668,7 @@ PrefabInstance:
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.8870109
+      value: -0.58666515
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
@@ -5648,7 +5683,7 @@ PrefabInstance:
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -125
+      value: -71.841
       objectReference: {fileID: 0}
     - target: {fileID: 8978526188729447527, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
@@ -5773,12 +5808,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 775372493}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1840836565}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &778997254 stripped
 GameObject:
@@ -6506,7 +6541,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244282820}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c0b1970f694e9df458ed7f67a4b515d5, type: 3}
   m_Name: 
@@ -8645,6 +8680,7 @@ Transform:
   - {fileID: 147374058}
   - {fileID: 1522859320}
   - {fileID: 778997257}
+  - {fileID: 775372496}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1863452577
