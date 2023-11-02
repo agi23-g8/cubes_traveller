@@ -71,7 +71,6 @@ public class PlayerController : MonoBehaviour
         {
             Debug.DrawRay(currentPosition, rayDir, Color.green);
             Debug.Log("No hit");
-            Debug.Break();
         }
 
         Quaternion currentRotation = Quaternion.LookRotation(cubeTransform.TransformDirection(cubeRelativeRotation), currentNormal);
