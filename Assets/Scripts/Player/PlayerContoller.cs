@@ -140,6 +140,7 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddForce(currentNormal * jumpForce, ForceMode.VelocityChange);
             jumpTimer = jumpDelay;
+            animator.SetTrigger("Jump");
         }
 
     }
