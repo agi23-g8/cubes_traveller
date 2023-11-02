@@ -26,6 +26,10 @@ public class PlayerController : MonoBehaviour
     private bool jumpInput;
     private bool isGrounded;
 
+    private float jumpTimer = 0.0f;
+
+    private float jumpDelay = 0.2f;
+
 
     // Position relative to the rotation of the cube
     public Vector3 cubeRelativePosition;
@@ -65,14 +69,7 @@ public class PlayerController : MonoBehaviour
         if (Physics.Raycast(currentPosition + transform.up * 0.1f, rayDir, out hit, Mathf.Infinity, cubeLayerMask))
         {
             currentNormal = hit.normal;
-            Debug.DrawRay(currentPosition, currentNormal, Color.blue);
         }
-        else
-        {
-            Debug.DrawRay(currentPosition, rayDir, Color.green);
-            Debug.Log("No hit");
-        }
-
         Quaternion currentRotation = Quaternion.LookRotation(cubeTransform.TransformDirection(cubeRelativeRotation), currentNormal);
 
         // if the face is facing the camera, vertical input is up/down
@@ -123,19 +120,24 @@ public class PlayerController : MonoBehaviour
 
         // TODO: rework this after demo
         // check if the player is grounded
+        jumpTimer -= Time.fixedDeltaTime;
         isGrounded = false;
-        if (Physics.Raycast(currentPosition + transform.up * 0.05f, -currentNormal, out hit))
+        Debug.DrawRay(currentPosition, -currentNormal * 0.05f, Color.magenta);
+
+        if (Physics.Raycast(currentPosition, -currentNormal, out hit))
         {
-            if (hit.distance < 0.1f)
+            if (hit.distance < 0.05f)
             {
                 isGrounded = true;
             }
         }
 
         // jump
-        if (jumpInput && isGrounded)
+        bool canJump = jumpTimer <= 0.0f;
+        if (jumpInput && isGrounded && canJump)
         {
             rb.AddForce(currentNormal * jumpForce, ForceMode.VelocityChange);
+            jumpTimer = jumpDelay;
         }
 
     }
