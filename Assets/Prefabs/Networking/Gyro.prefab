@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2258347432905246749}
   - component: {fileID: 8288076945483008678}
   - component: {fileID: -239254404080009402}
+  - component: {fileID: 7709759469908239225}
   m_Layer: 0
   m_Name: Gyro
   m_TagString: Untagged
@@ -65,3 +66,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1c2567ea0e7de348a04648132e6ea5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7709759469908239225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4229133957927765346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc12511781af8354a8de9bb15e330e1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxZoom: 90
+  minZoom: 20
