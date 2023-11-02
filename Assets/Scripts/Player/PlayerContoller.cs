@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour
 
         // catch jump event
         jumpInput = Input.GetButton("Jump");
+
+
     }
 
     void FixedUpdate()

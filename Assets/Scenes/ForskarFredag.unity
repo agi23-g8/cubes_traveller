@@ -5593,8 +5593,7 @@ PrefabInstance:
         type: 3}
       propertyPath: animator
       value: 
-      objectReference: {fileID: 5866666021909216657, guid: f50099de01c537f479d7854a6fdb43f4,
-        type: 3}
+      objectReference: {fileID: 1244282824}
     - target: {fileID: 6186677262286660282, guid: 77a7f27b58093f744a46d44c4ef7538b,
         type: 3}
       propertyPath: cubeTransform
@@ -6547,6 +6546,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
+--- !u!95 &1244282824 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: f50099de01c537f479d7854a6fdb43f4,
+    type: 3}
+  m_PrefabInstance: {fileID: 552318796}
+  m_PrefabAsset: {fileID: 0}
 --- !u!64 &1244376301
 MeshCollider:
   m_ObjectHideFlags: 0
