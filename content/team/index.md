@@ -81,8 +81,22 @@ title: "Team"
 </div>
 
 <div style="display:flex;gap:10px;flex-direction:row;align-items:center;">
-<p style="width:10rem">{{% paige/image alt="Landscape" breakpoints=true class="object-fit-cover rounded-4" fetchpriority="high" height="15rem" loading="eager" src="gabriel.png" width="100%" %}}</p>
-<p class="display-7 fw-bold h3">Gabriel Françon</p>
+  <p style="width:10rem">{{% paige/image alt="Landscape" breakpoints=true class="object-fit-cover rounded-4" fetchpriority="high" height="15rem" loading="eager" src="gabriel.png" width="100%" %}}</p>
+  <div style="display:flex;gap:10px;flex-direction:column;width:40rem">
+      <span>
+      <nobr class="display-7 fw-bold h3">Gabriel Françon</nobr>
+      <a href="https://github.com/GabFrancon" class="social-link">Github</a>
+      <a href="https://www.linkedin.com/in/gabriel-francon/" class="social-link">LinkedIn</a>
+      </span>
+      <span>
+        <p class="tag">Shaders</p>
+        <p class="tag">Texturing</p>
+        <p class="tag">Level Art</p>
+      </span>
+      <p style="text-align:justify">
+        My primary focus was enhancing the visual aspects of our prototype. I implemented a versatile splat map-based shader to enable multi-texturing on the cube ground, and authored PBR ground textures. I also crafted a highly customizable shader for procedurally generating grass all around the cube, supporting wind animation and interactive effects with dynamic objects. To showcase these graphics improvements, I then set up the core scene layer, and further contributed to  fine-tuning the scene's rendering alongside my colleagues. As a bonus, I prototyped a deformable snow shader for potential future integration.
+      </p>
+  </div>
 </div>
 
 <div style="display:flex;gap:10px;flex-direction:row;align-items:center;">
