@@ -89,7 +89,7 @@ title: "Team"
       <a href="https://www.linkedin.com/in/gabriel-francon/" class="social-link">LinkedIn</a>
       </span>
       <span>
-        <p class="tag">Shaders</p>
+        <p class="tag">Shader Dev</p>
         <p class="tag">Texturing</p>
         <p class="tag">Level Art</p>
       </span>
