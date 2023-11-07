@@ -30,7 +30,6 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
 
         [Space(10)][Header(# Player displacement)][Space(10)]
         _BendIntensity("Bend Intensity", Range(0, 10)) = 3.0
-        _BendInfluenceRadius("Bend Influence Radius", Range(0, 0.5)) = 0.15
 
         [Space(10)][Header(# Lighting)][Space(10)]
         [Toggle(COMPUTE_LIGHTING)] _ComputeLighting("Compute Lighting", Float) = 0
@@ -71,6 +70,10 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
             // -------------------------------------
             // Global parameters
             uniform float3 _PlayerPosition;
+            uniform float _PlayerBendRadius;
+
+            uniform float3 _BallPosition;
+            uniform float _BallBendRadius;
 
             // -------------------------------------
             // Material textures
@@ -102,9 +105,7 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float4 _WindMap_ST;
                 float4 _WindVelocity;
                 float  _WindFrequency;
-
                 float _BendIntensity;
-                float _BendInfluenceRadius;
             CBUFFER_END
 
             // -------------------------------------
@@ -362,22 +363,38 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BladeBendVariation * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
                 // Apply wind displacement.
-                float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
-                float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
-                windSample = 2 * windSample - 1;
-                windSample *= length(_WindVelocity);
-                float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
-                float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+                float3x3 windMatrix;
+                {
+                    float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+                    float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
+                    windSample = 2 * windSample - 1;
+                    windSample *= length(_WindVelocity);
+                    float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+                    windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+                }
 
-                // Apply player displacement.
-                float3 playerToBladeVector = origin - mul(unity_WorldToObject, _PlayerPosition);
-                float bendIntensity = _BendIntensity * smoothstep(_BendInfluenceRadius, 0.f, length(playerToBladeVector));
-                float3 bendAxis = normalize(float3(dot(playerToBladeVector, tangent), dot(playerToBladeVector, bitangent), 0));
-                float3x3 playerBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+                // Apply bend displacement.
+                float3x3 playerBendMatrix;
+                {
+                    float3 playerToBladeVector = origin - mul(unity_WorldToObject, _PlayerPosition);
+                    float bendIntensity = _BendIntensity * smoothstep(_PlayerBendRadius, 0.f, length(playerToBladeVector));
+                    float3 bendAxis = normalize(float3(dot(playerToBladeVector, tangent), dot(playerToBladeVector, bitangent), 0));
+                    playerBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+                }
+
+                float3x3 ballBendMatrix;
+                {
+                    float3 ballToBladeVector = origin - mul(unity_WorldToObject, _BallPosition);
+                    float bendIntensity = _BendIntensity * smoothstep(_BallBendRadius, 0.f, length(ballToBladeVector));
+                    float3 bendAxis = normalize(float3(dot(ballToBladeVector, tangent), dot(ballToBladeVector, bitangent), 0));
+                    ballBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+                }
+
+                float3x3 bendMatrix = mul(mul(ballBendMatrix, playerBendMatrix), randBendMatrix);
 
                 // Transform the grass blades to the correct tangent space.
                 float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
-                float3x3 tipTransformationMatrix = mul(mul(mul(mul(tangentToLocal, windMatrix), playerBendMatrix), randBendMatrix), randRotMatrix);
+                float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), bendMatrix), randRotMatrix);
 
                 float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
                 float width = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff) * _ShadowIntensity;
@@ -739,22 +756,38 @@ Shader "Universal Render Pipeline/Custom/ProceduralGrass"
                 float3x3 randBendMatrix = BuildRotationMatrix(GenerateRandom(origin.zzx) * _BladeBendVariation * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
                 // Apply wind displacement.
-                float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
-                float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
-                windSample = 2 * windSample - 1;
-                windSample *= length(_WindVelocity);
-                float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
-                float3x3 windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+                float3x3 windMatrix;
+                {
+                    float2 windUV = origin.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+                    float2 windSample = tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy;
+                    windSample = 2 * windSample - 1;
+                    windSample *= length(_WindVelocity);
+                    float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+                    windMatrix = BuildRotationMatrix(UNITY_PI * windSample, windAxis);
+                }
 
-                // Apply player displacement.
-                float3 playerToBladeVector = origin - mul(unity_WorldToObject, _PlayerPosition);
-                float bendIntensity = _BendIntensity * smoothstep(_BendInfluenceRadius, 0.f, length(playerToBladeVector));
-                float3 bendAxis = normalize(float3(dot(playerToBladeVector, tangent), dot(playerToBladeVector, bitangent), 0));
-                float3x3 playerBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+                // Apply bend displacement.
+                float3x3 playerBendMatrix;
+                {
+                    float3 playerToBladeVector = origin - mul(unity_WorldToObject, _PlayerPosition);
+                    float bendIntensity = _BendIntensity * smoothstep(_PlayerBendRadius, 0.f, length(playerToBladeVector));
+                    float3 bendAxis = normalize(float3(dot(playerToBladeVector, tangent), dot(playerToBladeVector, bitangent), 0));
+                    playerBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+                }
+
+                float3x3 ballBendMatrix;
+                {
+                    float3 ballToBladeVector = origin - mul(unity_WorldToObject, _BallPosition);
+                    float bendIntensity = _BendIntensity * smoothstep(_BallBendRadius, 0.f, length(ballToBladeVector));
+                    float3 bendAxis = normalize(float3(dot(ballToBladeVector, tangent), dot(ballToBladeVector, bitangent), 0));
+                    ballBendMatrix = BuildRotationMatrix(bendIntensity * UNITY_PI * 0.5f, bendAxis);
+                }
+
+                float3x3 bendMatrix = mul(mul(ballBendMatrix, playerBendMatrix), randBendMatrix);
 
                 // Transform the grass blades to the correct tangent space.
                 float3x3 baseTransformationMatrix = mul(tangentToLocal, randRotMatrix);
-                float3x3 tipTransformationMatrix = mul(mul(mul(mul(tangentToLocal, windMatrix), playerBendMatrix), randBendMatrix), randRotMatrix);
+                float3x3 tipTransformationMatrix = mul(mul(mul(tangentToLocal, windMatrix), bendMatrix), randRotMatrix);
 
                 float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
                 float width  = lerp(_BladeWidthMin, _BladeWidthMax, GenerateRandom(origin.xzy) * falloff);
