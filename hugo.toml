@@ -1,4 +1,4 @@
-baseurl = "https://github.com/davidasberg/cubes_traveller"
+baseurl = "https://agi23-g8.github.io/cubes_traveller"
 enablerobotstxt = true
 languagecode = "en-us"
 paginate = 50
